@@ -5,6 +5,7 @@ description = ""
 authors = ["Jorge Mederos Alvarado <jmederosalvarado@gmail.com>"]
 packages = [
 	{include = "grammar_analyzer", from = "src"},
+	{include = "pycmp", from = "src"},
 ]
 
 [tool.poetry.dependencies]
