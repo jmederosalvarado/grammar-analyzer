@@ -1,6 +1,3 @@
-from . import visitor
-
-
 class Node:
     def evaluate(self):
         raise NotImplementedError()
