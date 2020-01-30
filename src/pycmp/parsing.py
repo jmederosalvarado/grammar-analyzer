@@ -1,7 +1,7 @@
 from itertools import islice
-from .utils import ContainerSet
-from .automata import State, multiline_formatter
-from .grammar import Item
+from pycmp.utils import ContainerSet
+from pycmp.automata import State, multiline_formatter
+from pycmp.grammar import Item
 
 
 def compute_local_first(firsts, alpha):

@@ -1,4 +1,4 @@
-from .grammar import Production, Sentence, Symbol, EOF, Epsilon
+from pycmp.grammar import Production, Sentence, Symbol, EOF, Epsilon
 
 
 class ContainerSet:
@@ -65,7 +65,8 @@ def inspect(item, grammar_name='G', mapper=None):
         return mapper[item]
     except (TypeError, KeyError):
         if isinstance(item, dict):
-            items = ',\n   '.join(f'{inspect(key, grammar_name, mapper)}: {inspect(value, grammar_name, mapper)}' for key, value in item.items())
+            items = ',\n   '.join(
+                f'{inspect(key, grammar_name, mapper)}: {inspect(value, grammar_name, mapper)}' for key, value in item.items())
             return f'{{\n   {items} \n}}'
         elif isinstance(item, ContainerSet):
             args = f'{ ", ".join(inspect(x, grammar_name, mapper) for x in item.set) } ,' if item.set else ''

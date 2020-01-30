@@ -1,5 +1,5 @@
 import pydot
-from .utils import ContainerSet, DisjointSet
+from pycmp.utils import ContainerSet, DisjointSet
 
 
 class State:

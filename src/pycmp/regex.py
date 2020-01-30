@@ -1,8 +1,8 @@
-from .grammar import Grammar
-from .automata import NFA, DFA
-from .automata import automata_closure, automata_union, automata_concatenation
-from .ast import Node, AtomicNode, UnaryNode, BinaryNode
-from .token import Token
+from pycmp.grammar import Grammar
+from pycmp.automata import NFA, DFA
+from pycmp.automata import automata_closure, automata_union, automata_concatenation
+from pycmp.ast import Node, AtomicNode, UnaryNode, BinaryNode
+from pycmp.token import Token
 
 
 class EpsilonNode(AtomicNode):

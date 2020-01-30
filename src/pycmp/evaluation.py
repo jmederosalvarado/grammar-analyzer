@@ -1,4 +1,4 @@
-from .grammar import EOF
+from pycmp.grammar import EOF
 
 
 def evaluate_parse(left_parse, tokens):

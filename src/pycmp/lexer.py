@@ -1,6 +1,6 @@
-from .token import Token
-from .regex import Regex
-from .automata import State
+from pycmp.token import Token
+from pycmp.regex import Regex
+from pycmp.automata import State
 
 
 class Lexer:
