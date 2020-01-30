@@ -1,8 +1,11 @@
 from pycmp.grammar import Grammar
 from pycmp.automata import NFA, DFA
 from pycmp.automata import automata_closure, automata_union, automata_concatenation
+from pycmp.automata import nfa_to_dfa, automata_minimization
 from pycmp.ast import Node, AtomicNode, UnaryNode, BinaryNode
 from pycmp.token import Token
+from pycmp.parsing import build_ll_parser
+from pycmp.evaluation import evaluate_parse
 
 
 class EpsilonNode(AtomicNode):
@@ -87,6 +90,7 @@ def build_regex_grammar():
 
 class Regex:
     grammar = build_regex_grammar()
+    parser = build_ll_parser(grammar)
 
     def __init__(self, regex, skip_whitespaces=False):
         self.regex = regex
@@ -97,10 +101,11 @@ class Regex:
 
     @classmethod
     def build_automaton(cls, regex, skip_whitespaces=False):
-        h = regex_tokenizer(regex, cls.grammar, skip_whitespaces=False)
-        f = metodo_predictivo_no_recursivo(h)
-        T = evaluate_parse(f, h)
-        H = T.evaluate()
-        X = nfa_to_dfa(H)
-        k = automata_minimization(X)
-        return k
+        tokens = regex_tokenizer(regex, cls.grammar, skip_whitespaces=False)
+        parse = cls.parser(tokens)
+        ast = evaluate_parse(parse, tokens)
+        nfa = ast.evaluate()
+        dfa = nfa_to_dfa(nfa)
+        minimized = automata_minimization(dfa)
+
+        return minimized
