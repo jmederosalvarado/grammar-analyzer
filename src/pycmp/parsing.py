@@ -353,7 +353,7 @@ def goto_lr1(items, symbol, firsts=None, just_kernel=False):
     return items if just_kernel else closure_lr1(items, firsts)
 
 
-def build_LR1_automaton(G):
+def build_lr1_automaton(G):
     assert len(G.start_symbol.productions) == 1, 'Grammar must be augmented'
 
     firsts = compute_firsts(G)
@@ -396,7 +396,7 @@ class LR1Parser(ShiftReduceParser):
     def _build_parsing_table(self):
         grammar = self.grammar.AugmentedGrammar(True)
 
-        automaton = build_LR1_automaton(grammar)
+        automaton = build_lr1_automaton(grammar)
         for i, node in enumerate(automaton):
             if self.verbose:
                 print(i, '\t', '\n\t '.join(str(x) for x in node.state), '\n')
