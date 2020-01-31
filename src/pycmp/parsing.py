@@ -211,8 +211,8 @@ class ShiftReduceParser:
             # Reduce case
             if action == self.REDUCE:
                 output.append(tag)
-                stack = stack[:-len(tag.Right)]
-                stack.append(self.goto[stack[-1], tag.Left])
+                stack = stack[:-len(tag.right)]
+                stack.append(self.goto[stack[-1], tag.left])
 
             # OK case
             if action == self.OK:
@@ -264,7 +264,7 @@ def build_lr0_automaton(grammar):
 class SLR1Parser(ShiftReduceParser):
 
     def _build_parsing_table(self):
-        grammar = self.grammar.AugmentedGrammar(True)
+        grammar = self.grammar.get_augmented_grammar(True)
         firsts = compute_firsts(grammar)
         follows = compute_follows(grammar, firsts)
 
@@ -279,18 +279,18 @@ class SLR1Parser(ShiftReduceParser):
             for state in node.state:
                 item = state.state
 
-                if item.IsReduceItem:
-                    action = self.REDUCE if item.production.Left != grammar.start_symbol else self.OK
-                    for c in follows[item.production.Left]:
+                if item.is_reduce_item:
+                    action = self.REDUCE if item.production.left != grammar.start_symbol else self.OK
+                    for c in follows[item.production.left]:
                         self._register(self.action, (idx, c), (action, item.production))
                     continue
 
-                x = item.NextSymbol
+                x = item.next_symbol
                 try:
-                    dest = node.transitions[x.Name][0]
+                    dest = node.transitions[x.name][0]
                 except KeyError:
                     continue
-                if x.IsTerminal:
+                if x.is_terminal:
                     self._register(self.action, (idx, x), (self.SHIFT, dest.idx))
                 else:
                     self._register(self.goto, (idx, x), dest.idx)
@@ -302,13 +302,13 @@ class SLR1Parser(ShiftReduceParser):
 
 
 def expand(item, firsts):
-    next_symbol = item.NextSymbol
-    if next_symbol is None or not next_symbol.IsNonTerminal:
+    next_symbol = item.next_symbol
+    if next_symbol is None or not next_symbol.is_nonterminal:
         return []
 
     lookaheads = ContainerSet()
     # Compute lookahead for child items
-    for preview in item.Preview():
+    for preview in item.preview():
         preview_firsts = compute_local_first(firsts, preview)
         lookaheads.update(preview_firsts)
 
@@ -321,7 +321,7 @@ def compress(items):
     centers = {}
 
     for item in items:
-        center = item.Center()
+        center = item.center()
         try:
             lookaheads = centers[center]
         except KeyError:
@@ -349,7 +349,7 @@ def closure_lr1(items, firsts):
 
 def goto_lr1(items, symbol, firsts=None, just_kernel=False):
     assert just_kernel or firsts is not None, '`firsts` must be provided if `just_kernel=False`'
-    items = frozenset(item.NextItem() for item in items if item.NextSymbol == symbol)
+    items = frozenset(item.next_item() for item in items if item.next_symbol == symbol)
     return items if just_kernel else closure_lr1(items, firsts)
 
 
@@ -357,10 +357,10 @@ def build_lr1_automaton(G):
     assert len(G.start_symbol.productions) == 1, 'Grammar must be augmented'
 
     firsts = compute_firsts(G)
-    firsts[G.EOF] = ContainerSet(G.EOF)
+    firsts[G.eof] = ContainerSet(G.eof)
 
     start_production = G.start_symbol.productions[0]
-    start_item = Item(start_production, 0, lookaheads=(G.EOF,))
+    start_item = Item(start_production, 0, lookaheads=(G.eof,))
     start = frozenset([start_item])
 
     closure = closure_lr1(start, firsts)
@@ -373,7 +373,7 @@ def build_lr1_automaton(G):
         current = pending.pop()
         current_state = visited[current]
 
-        for symbol in G.terminals + G.nonTerminals:
+        for symbol in G.terminals + G.nonterminals:
             # Get/Build `next_state`
             next_ = frozenset(goto_lr1(closure_lr1(current, firsts), symbol, just_kernel=True))
             if not next_:
@@ -386,7 +386,7 @@ def build_lr1_automaton(G):
                 next_closure = frozenset(closure_lr1(next_, firsts))
                 next_state = visited[next_] = State(next_closure, True)
 
-            current_state.add_transition(symbol.Name, next_state)
+            current_state.add_transition(symbol.name, next_state)
 
     automaton.set_formatter(multiline_formatter)
     return automaton
@@ -394,7 +394,7 @@ def build_lr1_automaton(G):
 
 class LR1Parser(ShiftReduceParser):
     def _build_parsing_table(self):
-        grammar = self.grammar.AugmentedGrammar(True)
+        grammar = self.grammar.get_augmented_grammar(True)
 
         automaton = build_lr1_automaton(grammar)
         for i, node in enumerate(automaton):
@@ -407,19 +407,19 @@ class LR1Parser(ShiftReduceParser):
             for item in node.state:
                 # - Fill `self.Action` and `self.Goto` according to `item`)
                 # - Feel free to use `self._register(...)`)
-                if item.IsReduceItem:
-                    is_start = item.production.Left == grammar.start_symbol
+                if item.is_reduce_item:
+                    is_start = item.production.left == grammar.start_symbol
                     for s in item.lookaheads:
-                        action = self.OK if is_start and s == grammar.EOF else self.REDUCE
+                        action = self.OK if is_start and s == grammar.eof else self.REDUCE
                         self._register(self.action, (idx, s), (action, item.production))
                     continue
 
-                x = item.NextSymbol
+                x = item.next_symbol
                 try:
-                    dest = node.transitions[x.Name][0]
+                    dest = node.transitions[x.name][0]
                 except KeyError:
                     continue
-                if x.IsTerminal:
+                if x.is_terminal:
                     self._register(self.action, (idx, x), (self.SHIFT, dest.idx))
                 else:
                     self._register(self.goto, (idx, x), dest.idx)

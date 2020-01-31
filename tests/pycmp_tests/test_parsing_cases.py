@@ -1,6 +1,8 @@
-from pycmp.grammar import Grammar, Sentence, Production, AttributedProduction
-from pycmp.utils import ContainerSet
+from pycmp.parsing import compute_firsts
 from pycmp.token import Token
+from pycmp.utils import ContainerSet
+from pycmp.grammar import Grammar, Sentence, Production
+from pycmp.grammar import AttributedProduction, Item
 
 test_compute_firsts_cases = []
 test_compute_follows_cases = []
@@ -266,21 +268,56 @@ F %= num | opar + E + cpar
 
 grammar = grammar.get_augmented_grammar()
 
-test_build_lr0_automata_cases = [
+test_build_lr0_automaton_cases = [
     (grammar, 'E', True),
     (grammar, 'T*F', True),
     (grammar, ['E', '+', 'int'], True),
     (grammar, 'E*F', False),
 ]
 
-tokens = [
-    Token('1', num),
-    Token('+', plus),
-    Token('1', num),
-    Token('*', star),
-    Token('1', num),
-    Token('$', grammar.eof)
-]
+tokens = [num, plus, num, star, num, grammar.eof]
 derivation = '[F -> int, T -> F, E -> T, F -> int, T -> F, F -> int, T -> T * F, E -> E + T]'
 
 test_slr1_parser_cases = [(grammar, tokens, derivation)]
+
+grammar = Grammar()
+E = grammar.add_nonterminal('E', True)
+A = grammar.add_nonterminal('A')
+equal, plus, num = grammar.add_terminals('= + int')
+
+E %= A + equal + A | num
+A %= num + plus + A | num
+
+item = Item(E.productions[0], 0, lookaheads=[grammar.eof, plus])
+firsts = compute_firsts(grammar)
+firsts[grammar.eof] = ContainerSet(grammar.eof)
+
+test_expand_cases = [(item, firsts, "[A -> .int+A, {'='}, A -> .int, {'='}]")]
+
+expected = {
+    Item(E.productions[0], 0, lookaheads=(plus, grammar.eof)),
+    Item(E.productions[0], 2, lookaheads=(plus, grammar.eof)),
+    Item(A.productions[0], 0, lookaheads=(plus, grammar.eof, equal)),
+    Item(A.productions[1], 0, lookaheads=(plus, grammar.eof, equal)),
+}
+
+test_closure_lr1_cases = [([item, item.next_item().next_item()], firsts, expected)]
+
+test_goto_lr1_cases = [([item], A, firsts,
+                        {Item(E.productions[0], 1, lookaheads=(plus, grammar.eof))})]
+
+grammar = grammar.get_augmented_grammar()
+
+test_build_lr1_automaton_cases = [
+    (grammar, 'E', True),
+    (grammar, ['A', '=', 'int'], True),
+    (grammar, ['int', '+', 'int', '+', 'A'], True),
+
+    (grammar, ['int', '+', 'A', '+', 'int'], False),
+    (grammar, ['int', '=', 'int'], False),
+]
+
+tokens = [num, plus, num, equal, num, plus, num, grammar.eof]
+derivation = '[A -> int, A -> int + A, A -> int, A -> int + A, E -> A = A]'
+
+test_lr1_parser_cases = [(grammar, tokens, derivation)]
