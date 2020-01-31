@@ -214,3 +214,20 @@ test_automata_minimization_recognize_cases = [
     (automaton, 'bbbbb', False),
     (automaton, 'abbabababa', False)
 ]
+
+automaton = DFA(states=3, finals=[2], transitions={
+    (0, 'a'): 0,
+    (0, 'b'): 1,
+    (1, 'a'): 2,
+    (1, 'b'): 1,
+    (2, 'a'): 0,
+    (2, 'b'): 1,
+})
+
+test_state_cases = [
+    (automaton, 'ba', True),
+    (automaton, 'aababbaba', True),
+    (automaton, '', False),
+    (automaton, 'aabaa', False),
+    (automaton, 'aababb', False)
+]

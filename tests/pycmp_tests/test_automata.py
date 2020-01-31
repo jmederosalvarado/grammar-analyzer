@@ -4,6 +4,7 @@ from pycmp.automata import move, epsilon_closure
 from pycmp.automata import nfa_to_dfa
 from pycmp.automata import automata_union, automata_concatenation, automata_closure
 from pycmp.automata import state_minimization, automata_minimization
+from pycmp.automata import State
 
 from tests.pycmp_tests.test_automata_cases import test_dfa_cases
 from tests.pycmp_tests.test_automata_cases import test_move_cases
@@ -22,6 +23,7 @@ from tests.pycmp_tests.test_automata_cases import test_state_minimization_states
 from tests.pycmp_tests.test_automata_cases import test_state_minimization_group_cases
 from tests.pycmp_tests.test_automata_cases import test_automata_minimization_states_cases
 from tests.pycmp_tests.test_automata_cases import test_automata_minimization_recognize_cases
+from tests.pycmp_tests.test_automata_cases import test_state_cases
 
 
 @pytest.mark.parametrize(('dfa', 'text', 'recognize'), test_dfa_cases)
@@ -131,3 +133,9 @@ def test_automata_minimization_states(automaton, states):
 def test_automata_minimization_recognize(automaton, text, recognize):
     minimized = automata_minimization(automaton)
     assert recognize == minimized.recognize(text)
+
+
+@pytest.mark.parametrize(('automaton', 'text', 'recognize'), test_state_cases)
+def test_state(automaton, text, recognize):
+    state = State.from_nfa(automaton)
+    assert recognize == state.recognize(text)
