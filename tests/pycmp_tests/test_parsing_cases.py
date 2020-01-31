@@ -272,3 +272,15 @@ test_build_lr0_automata_cases = [
     (grammar, ['E', '+', 'int'], True),
     (grammar, 'E*F', False),
 ]
+
+tokens = [
+    Token('1', num),
+    Token('+', plus),
+    Token('1', num),
+    Token('*', star),
+    Token('1', num),
+    Token('$', grammar.eof)
+]
+derivation = '[F -> int, T -> F, E -> T, F -> int, T -> F, F -> int, T -> T * F, E -> E + T]'
+
+test_slr1_parser_cases = [(grammar, tokens, derivation)]
