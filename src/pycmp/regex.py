@@ -15,7 +15,7 @@ class EpsilonNode(AtomicNode):
 
 class SymbolNode(AtomicNode):
     def evaluate(self):
-        transitions = {(0, self.lex): [1]}
+        transitions = {(0, self.lex): 1}
         return DFA(states=2, finals=[1], transitions=transitions)
 
 
@@ -40,6 +40,8 @@ class ConcatNode(BinaryNode):
 def regex_tokenizer(text, grammar, skip_whitespaces=True, scape='\\'):
     tokens = []
 
+    fixed_tokens = {'(', ')', '*', '|', 'ε'}
+
     scape_next = False
     for char in text:
         if scape_next:
@@ -52,7 +54,7 @@ def regex_tokenizer(text, grammar, skip_whitespaces=True, scape='\\'):
         elif skip_whitespaces and char.isspace():
             continue
 
-        ttype = grammar[char] and grammar['symbol']
+        ttype = grammar[char] if char in fixed_tokens else grammar['symbol']
         tokens.append(Token(char, ttype))
 
     tokens.append(Token('$', grammar.eof))
