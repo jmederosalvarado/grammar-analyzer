@@ -68,7 +68,7 @@ class NonTerminal(Symbol):
         if isinstance(other, SentenceList):
             for s in other:
                 p = Production(self, s)
-                self.grammar.add_Production(p)
+                self.grammar.add_production(p)
 
             return self
 

@@ -39,9 +39,9 @@ def compute_firsts(grammar):
         change = False
 
         # P: X -> alpha
-        for production in grammar.Productions:
-            X = production.Left
-            alpha = production.Right
+        for production in grammar.productions:
+            X = production.left
+            alpha = production.right
 
             # get current First(X)
             first_X = firsts[X]
@@ -63,32 +63,32 @@ def compute_firsts(grammar):
     return firsts
 
 
-def compute_follows(G, firsts):
+def compute_follows(g, firsts):
     follows = {}
     change = True
 
     local_firsts = {}
 
     # init Follow(Vn)
-    for nonterminal in G.nonTerminals:
+    for nonterminal in g.nonterminals:
         follows[nonterminal] = ContainerSet()
-    follows[G.startSymbol] = ContainerSet(G.EOF)
+    follows[g.start_symbol] = ContainerSet(g.eof)
 
     while change:
         change = False
 
         # P: X -> alpha
-        for production in G.Productions:
-            X = production.Left
-            alpha = production.Right
+        for production in g.productions:
+            x = production.left
+            alpha = production.right
 
-            follow_X = follows[X]
+            follow_x = follows[x]
 
             # X -> zeta Y beta
             # First(beta) - { epsilon } subset of Follow(Y)
             # beta ->* epsilon or X -> zeta Y ? Follow(X) subset of Follow(Y)
             for i, y in enumerate(alpha):
-                if y not in G.nonTerminals:
+                if y not in g.nonterminals:
                     continue
                 beta = alpha[i+1:]
                 if beta:
@@ -96,36 +96,36 @@ def compute_follows(G, firsts):
                         local_firsts[beta] = compute_local_first(firsts, beta)
                     change |= follows[y].update(local_firsts[beta])
                 if not beta or local_firsts[beta].contains_epsilon:
-                    change |= follows[y].update(follow_X)
+                    change |= follows[y].update(follow_x)
 
     # Follow(Vn)
     return follows
 
 
-def build_ll_table(G, firsts, follows):
+def build_ll_table(g, firsts, follows):
     # init parsing table
     table = {}
 
     # P: X -> alpha
-    for production in G.Productions:
-        X = production.Left
-        alpha = production.Right
+    for production in g.productions:
+        x = production.left
+        alpha = production.right
 
         # working with symbols on First(alpha)
         for t in firsts[alpha]:
             try:
-                table[(X, t)].append(production)
+                table[x, t].append(production)
             except KeyError:
-                table[(X, t)] = [production]
+                table[x, t] = [production]
 
         # working with epsilon
         if firsts[alpha].contains_epsilon:
-            for t in G.terminals + [G.EOF]:
-                if t in follows[X]:
+            for t in g.terminals + [g.eof]:
+                if t in follows[x]:
                     try:
-                        table[(X, t)].append(production)
+                        table[x, t].append(production)
                     except KeyError:
-                        table[(X, t)] = [production]
+                        table[x, t] = [production]
 
     return table
 
@@ -139,17 +139,17 @@ def build_ll_parser(grammar, table=None, firsts=None, follows=None):
             follows = compute_follows(grammar, firsts)
         table = build_ll_table(grammar, firsts, follows)
 
-    def parser(text):
+    def parser(tokens):
         stack = [grammar.start_symbol]
         cursor = 0
         output = []
 
-        # parsing text
+        # parsing tokens
         while len(stack) > 0:
             top = stack.pop()
-            a = text[cursor]
+            a = tokens[cursor]
 
-            if top.IsTerminal and text[cursor] == top:
+            if top.is_terminal and tokens[cursor] == top:
                 cursor += 1
 
             else:
