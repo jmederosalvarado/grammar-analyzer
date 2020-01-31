@@ -1,10 +1,10 @@
 class Token:
-    def __init__(self, lex, token_type):
+    def __init__(self, lex, ttype):
         self.lex = lex
-        self.token_type = token_type
+        self.ttype = ttype
 
     def __str__(self):
-        return f'{self.token_type}: {self.lex}'
+        return f'{self.ttype}: {self.lex}'
 
     def __repr__(self):
         return str(self)
@@ -18,8 +18,8 @@ class UnknownToken(Token):
     def __init__(self, lex):
         Token.__init__(self, lex, None)
 
-    def transform_to(self, token_type):
-        return Token(self.lex, token_type)
+    def transform_to(self, ttype):
+        return Token(self.lex, ttype)
 
     @property
     def is_valid(self):

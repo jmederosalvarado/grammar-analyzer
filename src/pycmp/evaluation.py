@@ -9,7 +9,7 @@ def evaluate_parse(left_parse, tokens):
     tokens = iter(tokens)
     result = evaluate(next(left_parse), left_parse, tokens)
 
-    assert isinstance(next(tokens).token_type, EOF)
+    assert isinstance(next(tokens).ttype, EOF)
     return result
 
 
@@ -22,13 +22,13 @@ def evaluate(production, left_parse, tokens, inherited_value=None):
 
     for i, symbol in enumerate(body, 1):
         inherited.append(attributes[i] and attributes[i](inherited, synteticed))
-        if symbol.IsTerminal:
+        if symbol.is_terminal:
             assert inherited[i] is None
             lex = next(tokens).lex
             synteticed.append(lex)
         else:
             next_production = next(left_parse)
-            assert symbol == next_production.Left
+            assert symbol == next_production.left
             synteticed.append(evaluate(next_production, left_parse, tokens, inherited[i]))
 
     synteticed[0] = attributes[0] and attributes[0](inherited, synteticed)

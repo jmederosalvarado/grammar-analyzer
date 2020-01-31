@@ -1,10 +1,12 @@
-from pycmp.grammar import Grammar, Sentence, Production
+from pycmp.grammar import Grammar, Sentence, Production, AttributedProduction
 from pycmp.utils import ContainerSet
+from pycmp.token import Token
 
 test_compute_firsts_cases = []
 test_compute_follows_cases = []
 test_build_ll_table_cases = []
 test_build_ll_parser_cases = []
+test_evaluate_parse_cases = []
 
 grammar = Grammar()
 E = grammar.add_nonterminal('E', True)
@@ -80,7 +82,22 @@ table = {
 }
 test_build_ll_table_cases.append((grammar, firsts, follows, table))
 
-tokens = [num, star, num, star, num, plus, num, star, num, plus, num, plus, num, grammar.eof]
+tokens = [
+    Token('1', num),
+    Token('*', star),
+    Token('1', num),
+    Token('*', star),
+    Token('1', num),
+    Token('+', plus),
+    Token('1', num),
+    Token('*', star),
+    Token('1', num),
+    Token('+', plus),
+    Token('1', num),
+    Token('+', plus),
+    Token('1', num),
+    Token('$', grammar.eof)
+]
 test_build_ll_parser_cases.append((
     grammar, firsts, follows, table, tokens, [
         Production(E, Sentence(T, X)),
@@ -201,7 +218,7 @@ table = {
 }
 test_build_ll_table_cases.append((grammar, firsts, follows, table))
 
-tokens = [b, b, d, grammar.eof]
+tokens = [Token('b', b), Token('b', b), Token('d', d), Token('$', grammar.eof)]
 test_build_ll_parser_cases.append((
     grammar, firsts, follows, table, tokens, [
         Production(S, Sentence(B, C)),
@@ -211,3 +228,29 @@ test_build_ll_parser_cases.append((
         Production(C, Sentence(d))
     ]
 ))
+
+
+grammar = Grammar()
+E = grammar.add_nonterminal('E', True)
+T, F, X, Y = grammar.add_nonterminals('T F X Y')
+plus, minus, star, div, opar, cpar, num = grammar.add_terminals('+ - * / ( ) num')
+
+left_parse = [
+    AttributedProduction(E, Sentence(T, X), [lambda h, s: s[2], None, lambda h, s: s[1]]),
+    AttributedProduction(T, Sentence(F, Y), [lambda h, s: s[2], None, lambda h, s: s[1]]),
+    AttributedProduction(F, Sentence(num), [lambda h, s: float(s[1]), None]),
+    AttributedProduction(Y, grammar.epsilon, [lambda h, s: h[0]]),
+    AttributedProduction(X, Sentence(plus, T, X), [lambda h, s: s[3], None, None, lambda h, s: h[0] + s[2]]),
+    AttributedProduction(T, Sentence(F, Y), [lambda h, s: s[2], None, lambda h, s: s[1]]),
+    AttributedProduction(F, Sentence(num), [lambda h, s: float(s[1]), None]),
+    AttributedProduction(Y, grammar.epsilon, [lambda h, s: h[0]]),
+    AttributedProduction(X, grammar.epsilon, [lambda h, s: h[0]]),
+]
+tokens = [
+    Token('5.9', num),
+    Token('+', plus),
+    Token('4', num),
+    Token('$', grammar.eof)
+]
+
+test_evaluate_parse_cases.append((left_parse, tokens, 9.9))
