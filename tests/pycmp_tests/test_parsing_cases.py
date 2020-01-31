@@ -254,3 +254,21 @@ tokens = [
 ]
 
 test_evaluate_parse_cases.append((left_parse, tokens, 9.9))
+
+grammar = Grammar()
+E = grammar.add_nonterminal('E', True)
+T, F = grammar.add_nonterminals('T F')
+plus, minus, star, div, opar, cpar, num = grammar.add_terminals('+ - * / ( ) int')
+
+E %= E + plus + T | T  # | E + minus + T
+T %= T + star + F | F  # | T + div + F
+F %= num | opar + E + cpar
+
+grammar = grammar.get_augmented_grammar()
+
+test_build_lr0_automata_cases = [
+    (grammar, 'E', True),
+    (grammar, 'T*F', True),
+    (grammar, ['E', '+', 'int'], True),
+    (grammar, 'E*F', False),
+]

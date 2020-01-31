@@ -221,10 +221,10 @@ class ShiftReduceParser:
         return output
 
 
-def build_LR0_automaton(G):
-    assert len(G.startSymbol.productions) == 1, 'Grammar must be augmented'
+def build_lr0_automaton(grammar):
+    assert len(grammar.start_symbol.productions) == 1, 'Grammar must be augmented'
 
-    start_production = G.startSymbol.productions[0]
+    start_production = grammar.start_symbol.productions[0]
     start_item = Item(start_production, 0)
 
     automaton = State(start_item, True)
@@ -234,14 +234,14 @@ def build_LR0_automaton(G):
 
     while pending:
         current_item = pending.pop()
-        if current_item.IsReduceItem:
+        if current_item.is_reduce_item:
             continue
 
-        next_symbol = current_item.NextSymbol
-        next_item = current_item.NextItem()
+        next_symbol = current_item.next_symbol
+        next_item = current_item.next_item()
 
-        transitions = [(next_symbol.Name, next_item)]
-        if next_symbol.IsNonTerminal:
+        transitions = [(next_symbol.name, next_item)]
+        if next_symbol.is_nonterminal:
             transitions.extend([(None, Item(prod, 0)) for prod in next_symbol.productions])
 
         current_state = visited[current_item]
@@ -268,7 +268,7 @@ class SLR1Parser(ShiftReduceParser):
         firsts = compute_firsts(grammar)
         follows = compute_follows(grammar, firsts)
 
-        automaton = build_LR0_automaton(grammar).to_deterministic()
+        automaton = build_lr0_automaton(grammar).to_deterministic()
         for i, node in enumerate(automaton):
             if self.verbose:
                 print(i, '\t', '\n\t '.join(str(x) for x in node.state), '\n')
@@ -354,12 +354,12 @@ def goto_lr1(items, symbol, firsts=None, just_kernel=False):
 
 
 def build_LR1_automaton(G):
-    assert len(G.startSymbol.productions) == 1, 'Grammar must be augmented'
+    assert len(G.start_symbol.productions) == 1, 'Grammar must be augmented'
 
     firsts = compute_firsts(G)
     firsts[G.EOF] = ContainerSet(G.EOF)
 
-    start_production = G.startSymbol.productions[0]
+    start_production = G.start_symbol.productions[0]
     start_item = Item(start_production, 0, lookaheads=(G.EOF,))
     start = frozenset([start_item])
 
@@ -408,7 +408,7 @@ class LR1Parser(ShiftReduceParser):
                 # - Fill `self.Action` and `self.Goto` according to `item`)
                 # - Feel free to use `self._register(...)`)
                 if item.IsReduceItem:
-                    is_start = item.production.Left == grammar.startSymbol
+                    is_start = item.production.Left == grammar.start_symbol
                     for s in item.lookaheads:
                         action = self.OK if is_start and s == grammar.EOF else self.REDUCE
                         self._register(self.action, (idx, s), (action, item.production))
