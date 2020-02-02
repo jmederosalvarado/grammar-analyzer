@@ -266,13 +266,13 @@ E %= E + plus + T | T  # | E + minus + T
 T %= T + star + F | F  # | T + div + F
 F %= num | opar + E + cpar
 
-grammar = grammar.get_augmented_grammar()
+augmented = grammar.get_augmented_grammar()
 
 test_build_lr0_automaton_cases = [
-    (grammar, 'E', True),
-    (grammar, 'T*F', True),
-    (grammar, ['E', '+', 'int'], True),
-    (grammar, 'E*F', False),
+    (augmented, 'E', True),
+    (augmented, 'T*F', True),
+    (augmented, ['E', '+', 'int'], True),
+    (augmented, 'E*F', False),
 ]
 
 tokens = [num, plus, num, star, num, grammar.eof]
@@ -306,15 +306,15 @@ test_closure_lr1_cases = [([item, item.next_item().next_item()], firsts, expecte
 test_goto_lr1_cases = [([item], A, firsts,
                         {Item(E.productions[0], 1, lookaheads=(plus, grammar.eof))})]
 
-grammar = grammar.get_augmented_grammar()
+augmented = grammar.get_augmented_grammar()
 
 test_build_lr1_automaton_cases = [
-    (grammar, 'E', True),
-    (grammar, ['A', '=', 'int'], True),
-    (grammar, ['int', '+', 'int', '+', 'A'], True),
+    (augmented, 'E', True),
+    (augmented, ['A', '=', 'int'], True),
+    (augmented, ['int', '+', 'int', '+', 'A'], True),
 
-    (grammar, ['int', '+', 'A', '+', 'int'], False),
-    (grammar, ['int', '=', 'int'], False),
+    (augmented, ['int', '+', 'A', '+', 'int'], False),
+    (augmented, ['int', '=', 'int'], False),
 ]
 
 tokens = [num, plus, num, equal, num, plus, num, grammar.eof]
