@@ -47,11 +47,13 @@ def regex_tokenizer(text, grammar, skip_whitespaces=True, scape='\\'):
         if scape_next:
             tokens.append(Token(char, grammar['symbol']))
             scape_next = False
+            continue
 
-        elif char == scape:
+        if char == scape:
             scape_next = True
+            continue
 
-        elif skip_whitespaces and char.isspace():
+        if skip_whitespaces and char.isspace():
             continue
 
         ttype = grammar[char] if char in fixed_tokens else grammar['symbol']
@@ -96,14 +98,15 @@ class Regex:
 
     def __init__(self, regex, skip_whitespaces=False):
         self.regex = regex
-        self.automaton = self.build_automaton(regex)
+        self.automaton = Regex.build_automaton(regex, skip_whitespaces=skip_whitespaces)
 
     def __call__(self, text):
         return self.automaton.recognize(text)
 
     @classmethod
     def build_automaton(cls, regex, skip_whitespaces=False):
-        tokens = regex_tokenizer(regex, cls.grammar, skip_whitespaces=False)
+        tokens = regex_tokenizer(regex, cls.grammar, skip_whitespaces=skip_whitespaces)
+        print(tokens)
         parse = cls.parser(tokens)
         ast = evaluate_parse(parse, tokens)
         nfa = ast.evaluate()

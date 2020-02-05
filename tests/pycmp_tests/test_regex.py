@@ -22,5 +22,5 @@ test_regex_cases = [
 
 @pytest.mark.parametrize(('regex', 'text', 'recognize'), test_regex_cases)
 def test_regex(regex, text, recognize):
-    regex = Regex(regex)
+    regex = Regex(regex, skip_whitespaces=True)
     assert recognize == regex(text)
