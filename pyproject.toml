@@ -13,6 +13,7 @@ packages = [
 python = "^3.8"
 pydot = "^1.4.1"
 streamlit = "^0.54.0"
+click = "^7.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
