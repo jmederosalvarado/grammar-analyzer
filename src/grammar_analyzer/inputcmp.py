@@ -29,7 +29,7 @@ def build_input_grammar():
     Returns the following grammar:
 
     grammar -> prod_list
-    prod_list -> prod | prod prod_list
+    prod_list -> prod | prod eol prod_list
     prod -> symbol '->' sent_list
     sent_list -> sent | sent '|' sent_list
     sent -> symbol_list | 'eps'
@@ -60,6 +60,8 @@ def build_input_grammar():
 def build_lexer(grammar):
     digits = "|".join(str(n) for n in range(10))
     letters = "|".join(chr(n) for n in range(ord("a"), ord("z") + 1))
+    others = "|".join([r"\(", r"\)"])
+    symbols = f"{letters}|{digits}|{others}"
     return Lexer(
         [
             (grammar["eps"], "eps"),
@@ -67,7 +69,7 @@ def build_lexer(grammar):
             (grammar["->"], "->"),
             (grammar["eol"], "\\n"),
             (None, "  *"),
-            (grammar["symbol"], f"({letters}|{digits})*"),
+            (grammar["symbol"], f"({symbols})({symbols})*"),
         ],
         grammar.eof,
     )

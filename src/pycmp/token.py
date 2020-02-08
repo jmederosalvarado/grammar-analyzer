@@ -9,6 +9,11 @@ class Token:
     def __repr__(self):
         return str(self)
 
+    def __eq__(self, value):
+        if type(self) != type(value):
+            return False
+        return self.lex == value.lex and self.ttype == value.ttype
+
     @property
     def is_valid(self):
         return True
