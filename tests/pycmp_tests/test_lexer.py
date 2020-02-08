@@ -10,7 +10,6 @@ from tests.pycmp_tests.test_lexer_cases import test_lexer_ttype_cases
 def test_lexer_lexs(regexs, eof, text, lexs):
     lexer = Lexer(regexs, eof)
     tokens = lexer(text)
-    print(f"{tokens=}")
     assert lexs == tuple(t.lex for t in tokens)
 
 
