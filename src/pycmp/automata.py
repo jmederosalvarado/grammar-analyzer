@@ -3,7 +3,7 @@ from pycmp.utils import ContainerSet, DisjointSet
 
 
 class State:
-    def __init__(self, state, final=False, formatter=lambda x: str(x), shape='circle'):
+    def __init__(self, state, final=False, formatter=lambda x: str(x), shape="circle"):
         self.state = state
         self.final = final
         self.transitions = {}
@@ -12,7 +12,7 @@ class State:
         self.formatter = formatter
         self.shape = shape
 
-    def set_formatter(self, value, attr='formatter', visited=None):
+    def set_formatter(self, value, attr="formatter", visited=None):
         if visited is None:
             visited = set()
         elif self in visited:
@@ -65,8 +65,9 @@ class State:
                 closure = self.epsilon_closure_by_state(*move)
 
                 if closure not in closures:
-                    new_state = State(tuple(closure), any(
-                        s.final for s in closure), formatter)
+                    new_state = State(
+                        tuple(closure), any(s.final for s in closure), formatter
+                    )
                     closures.append(closure)
                     states.append(new_state)
                     pending.append(new_state)
@@ -95,7 +96,9 @@ class State:
 
     @staticmethod
     def move_by_state(symbol, *states):
-        return {s for state in states if state.has_transition(symbol) for s in state[symbol]}
+        return {
+            s for state in states if state.has_transition(symbol) for s in state[symbol]
+        }
 
     @staticmethod
     def epsilon_closure_by_state(*states):
@@ -124,7 +127,7 @@ class State:
         return target[0]
 
     def __getitem__(self, symbol):
-        if symbol == '':
+        if symbol == "":
             return self.epsilon_transitions
         try:
             return self.transitions[symbol]
@@ -132,7 +135,7 @@ class State:
             return None
 
     def __setitem__(self, symbol, value):
-        if symbol == '':
+        if symbol == "":
             self.epsilon_transitions = value
         else:
             self.transitions[symbol] = value
@@ -165,9 +168,8 @@ class State:
             yield from node._visit(visited)
 
     def graph(self):
-        G = pydot.Dot(rankdir='LR', margin=0.1)
-        G.add_node(pydot.Node('start', shape='plaintext',
-                              label='', width=0, height=0))
+        G = pydot.Dot(rankdir="LR", margin=0.1)
+        G.add_node(pydot.Node("start", shape="plaintext", label="", width=0, height=0))
 
         visited = set()
 
@@ -175,31 +177,37 @@ class State:
             ids = id(start)
             if ids not in visited:
                 visited.add(ids)
-                G.add_node(pydot.Node(ids, label=start.name,
-                                      shape=self.shape, style='bold' if start.final else ''))
+                G.add_node(
+                    pydot.Node(
+                        ids,
+                        label=start.name,
+                        shape=self.shape,
+                        style="bold" if start.final else "",
+                    )
+                )
                 for tran, destinations in start.transitions.items():
                     for end in destinations:
                         visit(end)
-                        G.add_edge(pydot.Edge(
-                            ids, id(end), label=tran, labeldistance=2))
+                        G.add_edge(
+                            pydot.Edge(ids, id(end), label=tran, labeldistance=2)
+                        )
                 for end in start.epsilon_transitions:
                     visit(end)
-                    G.add_edge(pydot.Edge(
-                        ids, id(end), label='Îµ', labeldistance=2))
+                    G.add_edge(pydot.Edge(ids, id(end), label="Îµ", labeldistance=2))
 
         visit(self)
-        G.add_edge(pydot.Edge('start', id(self), label='', style='dashed'))
+        G.add_edge(pydot.Edge("start", id(self), label="", style="dashed"))
 
         return G
 
     def _repr_svg_(self):
         try:
-            return self.graph().create_svg().decode('utf8')
+            return self.graph().create_svg().decode("utf8")
         except:
             pass
 
     def write_to(self, fname):
-        return self.graph().write(fname, format='svg')
+        return self.graph().write(fname, format="svg")
 
 
 class NFA:
@@ -212,36 +220,44 @@ class NFA:
         self.transitions = {state: {} for state in range(states)}
 
         for (origin, symbol), destinations in transitions.items():
-            assert hasattr(destinations, '__iter__'), 'Invalid collection of states'
+            assert hasattr(destinations, "__iter__"), "Invalid collection of states"
             self.transitions[origin][symbol] = destinations
             self.vocabulary.add(symbol)
 
-        self.vocabulary.discard('')
+        self.vocabulary.discard("")
 
     def epsilon_transitions(self, state):
-        assert state in self.transitions, 'Invalid state'
+        assert state in self.transitions, "Invalid state"
         try:
-            return self.transitions[state]['']
+            return self.transitions[state][""]
         except KeyError:
             return ()
 
     def graph(self):
-        G = pydot.Dot(rankdir='LR', margin=0.1)
-        G.add_node(pydot.Node('start', shape='plaintext', label='', width=0, height=0))
+        G = pydot.Dot(rankdir="LR", margin=0.1)
+        G.add_node(pydot.Node("start", shape="plaintext", label="", width=0, height=0))
 
         for (start, tran), destinations in self.map.items():
-            tran = 'ε' if tran == '' else tran
-            G.add_node(pydot.Node(start, shape='circle', style='bold' if start in self.finals else ''))
+            tran = "ε" if tran == "" else tran
+            G.add_node(
+                pydot.Node(
+                    start, shape="circle", style="bold" if start in self.finals else ""
+                )
+            )
             for end in destinations:
-                G.add_node(pydot.Node(end, shape='circle', style='bold' if end in self.finals else ''))
+                G.add_node(
+                    pydot.Node(
+                        end, shape="circle", style="bold" if end in self.finals else ""
+                    )
+                )
                 G.add_edge(pydot.Edge(start, end, label=tran, labeldistance=2))
 
-        G.add_edge(pydot.Edge('start', self.start, label='', style='dashed'))
+        G.add_edge(pydot.Edge("start", self.start, label="", style="dashed"))
         return G
 
     def _repr_svg_(self):
         try:
-            return self.graph().create_svg().decode('utf8')
+            return self.graph().create_svg().decode("utf8")
         except:
             pass
 
@@ -326,7 +342,7 @@ def nfa_to_dfa(automaton):
 
             try:
                 transitions[state.id, symbol]
-                assert False, 'Invalid DFA!!!'
+                assert False, "Invalid DFA!!!"
             except KeyError:
                 transitions[state.id, symbol] = next_state.id
 
@@ -352,13 +368,13 @@ def automata_union(a1, a2):
         transitions[d2 + origin, symbol] = [d2 + dest for dest in destinations]
 
     # Add transitions from start state ...
-    transitions[start, ''] = [d1, d2]
+    transitions[start, ""] = [d1, d2]
 
     # Add transitions to final state ...
     for a1_final in a1.finals:
-        transitions[d1 + a1_final, ''] = [final]
+        transitions[d1 + a1_final, ""] = [final]
     for a2_final in a2.finals:
-        transitions[d2 + a2_final, ''] = [final]
+        transitions[d2 + a2_final, ""] = [final]
 
     states = a1.states + a2.states + 2
     finals = {final}
@@ -384,9 +400,9 @@ def automata_concatenation(a1, a2):
 
     # Add transitions to final state ...
     for a1_final in a1.finals:
-        transitions[d1 + a1_final, ''] = [d2]
+        transitions[d1 + a1_final, ""] = [d2]
     for a2_final in a2.finals:
-        transitions[d2 + a2_final, ''] = [final]
+        transitions[d2 + a2_final, ""] = [final]
 
     states = a1.states + a2.states + 1
     finals = {final}
@@ -406,11 +422,11 @@ def automata_closure(a1):
         transitions[d1 + origin, symbol] = [d1 + dest for dest in destinations]
 
     # Add transitions from start state ...
-    transitions[start, ''] = [d1, final]
+    transitions[start, ""] = [d1, final]
 
     # Add transitions to final state and to start state ...
     for a1_final in a1.finals:
-        transitions[d1 + a1_final, ''] = [start]
+        transitions[d1 + a1_final, ""] = [start]
 
     states = a1.states + 2
     finals = {final}
@@ -483,11 +499,11 @@ def automata_minimization(automaton):
 
 
 def multiline_formatter(state):
-    return '\n'.join(str(item) for item in state)
+    return "\n".join(str(item) for item in state)
 
 
 def lr0_formatter(state):
     try:
-        return '\n'.join(str(item)[:-4] for item in state)
+        return "\n".join(str(item)[:-4] for item in state)
     except TypeError:
         return str(state)[:-4]

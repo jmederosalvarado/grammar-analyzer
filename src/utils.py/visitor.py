@@ -23,6 +23,7 @@ class Visitor(object):
         def register(function):
             self.register(types, function)
             return function
+
         return register
 
 
@@ -36,4 +37,5 @@ def on(*argnames):
         registry[name] = Visitor(params)
 
         return registry[name]
+
     return register

@@ -37,15 +37,15 @@ class ConcatNode(BinaryNode):
         return automata_concatenation(lvalue, rvalue)
 
 
-def regex_tokenizer(text, grammar, skip_whitespaces=True, scape='\\'):
+def regex_tokenizer(text, grammar, skip_whitespaces=True, scape="\\"):
     tokens = []
 
-    fixed_tokens = {'(', ')', '*', '|', 'ε'}
+    fixed_tokens = {"(", ")", "*", "|", "ε"}
 
     scape_next = False
     for char in text:
         if scape_next:
-            tokens.append(Token(char, grammar['symbol']))
+            tokens.append(Token(char, grammar["symbol"]))
             scape_next = False
             continue
 
@@ -56,19 +56,19 @@ def regex_tokenizer(text, grammar, skip_whitespaces=True, scape='\\'):
         if skip_whitespaces and char.isspace():
             continue
 
-        ttype = grammar[char] if char in fixed_tokens else grammar['symbol']
+        ttype = grammar[char] if char in fixed_tokens else grammar["symbol"]
         tokens.append(Token(char, ttype))
 
-    tokens.append(Token('$', grammar.eof))
+    tokens.append(Token("$", grammar.eof))
     return tokens
 
 
 def build_regex_grammar():
     G = Grammar()
 
-    E = G.add_nonterminal('E', True)
-    T, F, A, X, Y, Z = G.add_nonterminals('T F A X Y Z')
-    pipe, star, opar, cpar, symbol, epsilon = G.add_terminals('| * ( ) symbol ε')
+    E = G.add_nonterminal("E", True)
+    T, F, A, X, Y, Z = G.add_nonterminals("T F A X Y Z")
+    pipe, star, opar, cpar, symbol, epsilon = G.add_terminals("| * ( ) symbol ε")
 
     E %= T + X, lambda h, s: s[2], None, lambda h, s: s[1]
 

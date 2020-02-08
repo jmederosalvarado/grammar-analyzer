@@ -29,7 +29,9 @@ def evaluate(production, left_parse, tokens, inherited_value=None):
         else:
             next_production = next(left_parse)
             assert symbol == next_production.left
-            synteticed.append(evaluate(next_production, left_parse, tokens, inherited[i]))
+            synteticed.append(
+                evaluate(next_production, left_parse, tokens, inherited[i])
+            )
 
     synteticed[0] = attributes[0] and attributes[0](inherited, synteticed)
     return synteticed[0]

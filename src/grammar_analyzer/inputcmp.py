@@ -36,10 +36,12 @@ def build_input_grammar():
     symbol_list -> symbol | symbol symbol_list
     """
     input_grammar = Grammar()
-    grammar = input_grammar.add_nonterminal('grammar', True)
-    prod, prod_list = input_grammar.add_nonterminals('prod prod_list')
-    sent, sent_list, symbol_list = input_grammar.add_nonterminals('sent sent_list symbol_list')
-    symbol, arrow, union, eps, eol = input_grammar.add_terminals('symbol -> | eps eol')
+    grammar = input_grammar.add_nonterminal("grammar", True)
+    prod, prod_list = input_grammar.add_nonterminals("prod prod_list")
+    sent, sent_list, symbol_list = input_grammar.add_nonterminals(
+        "sent sent_list symbol_list"
+    )
+    symbol, arrow, union, eps, eol = input_grammar.add_terminals("symbol -> | eps eol")
 
     grammar %= prod_list, lambda h, s: GNode(s[0])
     prod_list %= prod + eol + prod_list, lambda h, s: [s[0]] + s[1]
@@ -56,13 +58,16 @@ def build_input_grammar():
 
 
 def build_lexer(grammar):
-    digits = '|'.join(str(n) for n in range(10))
-    letters = '|'.join(chr(n) for n in range(ord('a'), ord('z')+1))
-    return Lexer([
-        (grammar['eps'], 'eps'),
-        (grammar['|'], r'\|'),
-        (grammar['->'], '->'),
-        (grammar['eol'], '\\n'),
-        (None, '  *'),
-        (grammar['symbol'], f'({letters}|{digits})*')
-    ], grammar.eof)
+    digits = "|".join(str(n) for n in range(10))
+    letters = "|".join(chr(n) for n in range(ord("a"), ord("z") + 1))
+    return Lexer(
+        [
+            (grammar["eps"], "eps"),
+            (grammar["|"], r"\|"),
+            (grammar["->"], "->"),
+            (grammar["eol"], "\\n"),
+            (None, "  *"),
+            (grammar["symbol"], f"({letters}|{digits})*"),
+        ],
+        grammar.eof,
+    )

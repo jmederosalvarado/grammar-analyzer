@@ -43,7 +43,7 @@ class ContainerSet:
         return len(self.set) + int(self.contains_epsilon)
 
     def __str__(self):
-        return '%s-%s' % (str(self.set), self.contains_epsilon)
+        return "%s-%s" % (str(self.set), self.contains_epsilon)
 
     def __repr__(self):
         return str(self)
@@ -57,38 +57,48 @@ class ContainerSet:
     def __eq__(self, other):
         if isinstance(other, set):
             return self.set == other
-        return isinstance(other, ContainerSet) and self.set == other.set and self.contains_epsilon == other.contains_epsilon
+        return (
+            isinstance(other, ContainerSet)
+            and self.set == other.set
+            and self.contains_epsilon == other.contains_epsilon
+        )
 
 
-def inspect(item, grammar_name='G', mapper=None):
+def inspect(item, grammar_name="G", mapper=None):
     try:
         return mapper[item]
     except (TypeError, KeyError):
         if isinstance(item, dict):
-            items = ',\n   '.join(
-                f'{inspect(key, grammar_name, mapper)}: {inspect(value, grammar_name, mapper)}' for key, value in item.items())
-            return f'{{\n   {items} \n}}'
+            items = ",\n   ".join(
+                f"{inspect(key, grammar_name, mapper)}: {inspect(value, grammar_name, mapper)}"
+                for key, value in item.items()
+            )
+            return f"{{\n   {items} \n}}"
         elif isinstance(item, ContainerSet):
-            args = f'{ ", ".join(inspect(x, grammar_name, mapper) for x in item.set) } ,' if item.set else ''
-            return f'ContainerSet({args} contains_epsilon={item.contains_epsilon})'
+            args = (
+                f'{ ", ".join(inspect(x, grammar_name, mapper) for x in item.set) } ,'
+                if item.set
+                else ""
+            )
+            return f"ContainerSet({args} contains_epsilon={item.contains_epsilon})"
         elif isinstance(item, EOF):
-            return f'{grammar_name}.EOF'
+            return f"{grammar_name}.EOF"
         elif isinstance(item, Epsilon):
-            return f'{grammar_name}.Epsilon'
+            return f"{grammar_name}.Epsilon"
         elif isinstance(item, Symbol):
             return f"G['{item.Name}']"
         elif isinstance(item, Sentence):
-            items = ', '.join(inspect(s, grammar_name, mapper) for s in item._symbols)
-            return f'Sentence({items})'
+            items = ", ".join(inspect(s, grammar_name, mapper) for s in item._symbols)
+            return f"Sentence({items})"
         elif isinstance(item, Production):
             left = inspect(item.Left, grammar_name, mapper)
             right = inspect(item.Right, grammar_name, mapper)
-            return f'Production({left}, {right})'
+            return f"Production({left}, {right})"
         elif isinstance(item, tuple) or isinstance(item, list):
-            ctor = ('(', ')') if isinstance(item, tuple) else ('[', ']')
+            ctor = ("(", ")") if isinstance(item, tuple) else ("[", "]")
             return f'{ctor[0]} {("%s, " * len(item)) % tuple(inspect(x, grammar_name, mapper) for x in item)}{ctor[1]}'
         else:
-            raise ValueError(f'Invalid: {item}')
+            raise ValueError(f"Invalid: {item}")
 
 
 def pprint(item, header=""):
@@ -97,12 +107,12 @@ def pprint(item, header=""):
 
     if isinstance(item, dict):
         for key, value in item.items():
-            print(f'{key}  --->  {value}')
+            print(f"{key}  --->  {value}")
     elif isinstance(item, list):
-        print('[')
+        print("[")
         for x in item:
-            print(f'   {repr(x)}')
-        print(']')
+            print(f"   {repr(x)}")
+        print("]")
     else:
         print(item)
 
@@ -126,7 +136,10 @@ class DisjointSet:
 
     @property
     def groups(self):
-        return [[n for n in self.nodes.values() if n.representative == r] for r in self.representatives]
+        return [
+            [n for n in self.nodes.values() if n.representative == r]
+            for r in self.representatives
+        ]
 
     def __len__(self):
         return len(self.representatives)

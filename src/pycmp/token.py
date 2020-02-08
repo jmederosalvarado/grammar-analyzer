@@ -4,7 +4,7 @@ class Token:
         self.ttype = ttype
 
     def __str__(self):
-        return f'{self.ttype}: {self.lex}'
+        return f"{self.ttype}: {self.lex}"
 
     def __repr__(self):
         return str(self)

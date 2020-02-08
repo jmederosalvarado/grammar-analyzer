@@ -22,7 +22,7 @@ class Lexer:
         return regexs
 
     def _build_automaton(self):
-        start = State('start')
+        start = State("start")
         for state in self.regexs:
             start.add_epsilon_transition(state)
         return start.to_deterministic()
@@ -30,7 +30,7 @@ class Lexer:
     def _walk(self, string):
         state = self.automaton
         final = state if state.final else None
-        final_lex = lex = ''
+        final_lex = lex = ""
 
         for symbol in string:
             if not state.has_transition(symbol):
@@ -53,7 +53,7 @@ class Lexer:
             highest = min([s for s in state.state if s.tag], key=lambda s: s.tag[0])
             yield lex, highest.tag[1]
 
-        yield '$', self.eof
+        yield "$", self.eof
 
     def __call__(self, text):
         return [Token(lex, ttype) for lex, ttype in self._tokenize(text)]
