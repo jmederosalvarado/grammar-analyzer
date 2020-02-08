@@ -167,7 +167,7 @@ def build_ll_parser(grammar, table=None, firsts=None, follows=None):
 
         return output
 
-    return lambda tokens: parser([t.ttype for t in tokens])
+    return parser
 
 
 class ShiftReduceParser:

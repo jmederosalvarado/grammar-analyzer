@@ -44,7 +44,7 @@ def test_build_ll_table(grammar, firsts, follows, table):
 )
 def test_build_ll_parser(grammar, firsts, follows, table, tokens, parse):
     parser = build_ll_parser(grammar, table, firsts, follows)
-    assert parse == parser(tokens)
+    assert parse == parser([t.ttype for t in tokens])
 
 
 @pytest.mark.parametrize(("left_parse", "tokens", "result"), test_evaluate_parse_cases)

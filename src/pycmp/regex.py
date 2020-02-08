@@ -106,8 +106,7 @@ class Regex:
     @classmethod
     def build_automaton(cls, regex, skip_whitespaces=False):
         tokens = regex_tokenizer(regex, cls.grammar, skip_whitespaces=skip_whitespaces)
-        print(tokens)
-        parse = cls.parser(tokens)
+        parse = cls.parser([t.ttype for t in tokens])
         ast = evaluate_parse(parse, tokens)
         nfa = ast.evaluate()
         dfa = nfa_to_dfa(nfa)
