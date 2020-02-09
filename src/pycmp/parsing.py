@@ -185,16 +185,15 @@ class ShiftReduceParser:
     def _build_parsing_table(self):
         raise NotImplementedError()
 
-    def __call__(self, w):
-        stack = [0]
-        cursor = 0
-        output = []
+    def __call__(self, tokens, return_actions=False):
+        stack, cursor = [0], 0
+        output, actions = [], []
 
         while True:
             state = stack[-1]
-            lookahead = w[cursor]
+            lookahead = tokens[cursor]
             if self.verbose:
-                print(stack, "<---||--->", w[cursor:])
+                print(stack, "<---||--->", tokens[cursor:])
 
             try:
                 action, tag = self.action[state, lookahead]
@@ -218,7 +217,9 @@ class ShiftReduceParser:
             if action == self.OK:
                 break
 
-        return output
+            actions.append(action)
+
+        return output, actions if return_actions else output
 
 
 def build_lr0_automaton(grammar):
