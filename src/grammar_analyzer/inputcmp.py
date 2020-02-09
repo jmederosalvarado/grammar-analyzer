@@ -5,6 +5,9 @@ from pycmp.lexer import Lexer
 from utils import visitor
 
 
+# TODO: Refactor this visitors
+
+
 class GNode(object):
     def __init__(self, productions):
         self.productions = tuple(productions)
