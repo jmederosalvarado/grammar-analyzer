@@ -33,3 +33,6 @@ def build_input_grammar():
     symbol_list %= symbol, lambda h, s: [SymbolNode(s[0])]
 
     return input_grammar
+
+
+input_grammar = build_input_grammar()
