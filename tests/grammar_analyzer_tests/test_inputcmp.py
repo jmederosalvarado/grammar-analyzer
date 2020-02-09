@@ -2,6 +2,8 @@ from grammar_analyzer.inputcmp import build_input_grammar
 from grammar_analyzer.inputcmp import build_lexer
 from pycmp.token import Token
 
+# TODO: Add more tests for inputcmp
+
 
 def test_build_lexer_1():
     grammar = build_input_grammar()
