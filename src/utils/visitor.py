@@ -31,7 +31,7 @@ def on(*argnames):
     def register(function):
         name = function.__name__
         params = signature(function).parameters
-        params = [i for i, _ in enumerate(argnames)]
+        params = [i for i, p in enumerate(params) if p in argnames]
 
         assert name not in registry
         registry[name] = Visitor(params)

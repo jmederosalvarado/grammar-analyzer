@@ -382,8 +382,8 @@ class Grammar:
         for term in data["terminals"]:
             dic[term] = g.add_terminal(term)
 
-        for noTerm in data["nonterminals"]:
-            dic[noTerm] = g.add_nonterminal(noTerm)
+        for nonterm in data["nonterminals"]:
+            dic[nonterm] = g.add_nonterminal(nonterm)
 
         for p in data["productions"]:
             head = p["head"]
