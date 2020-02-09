@@ -1,3 +1,11 @@
 import streamlit as st
 
-st.write("Hello world")
+# pylint: disable=no-value-for-parameter
+
+
+def run():
+    st.title("Grammar Analizer")
+
+
+if __name__ == "__main__":
+    run()
