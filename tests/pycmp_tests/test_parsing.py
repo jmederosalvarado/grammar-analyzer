@@ -91,5 +91,5 @@ def test_build_lr1_automaton(grammar, text, recognize):
 
 @pytest.mark.parametrize(("grammar", "tokens", "derivation"), test_lr1_parser_cases)
 def test_lr1_parser(grammar, tokens, derivation):
-    parser = LR1Parser(grammar, verbose=True)
+    parser = LR1Parser(grammar)
     assert derivation == str(parser(tokens))

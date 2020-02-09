@@ -219,7 +219,7 @@ class ShiftReduceParser:
 
             actions.append(action)
 
-        return output, actions if return_actions else output
+        return (output, actions) if return_actions else output
 
 
 def build_lr0_automaton(grammar):
