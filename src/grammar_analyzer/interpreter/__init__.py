@@ -1,0 +1,1 @@
+from grammar_analyzer.interpreter.interpreter import eval_input

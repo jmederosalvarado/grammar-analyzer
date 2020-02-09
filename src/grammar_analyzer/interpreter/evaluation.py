@@ -1,18 +1,8 @@
-from grammar_analyzer.input.ast import GNode, ProdNode, SentNode, SymbolNode
+from grammar_analyzer.interpreter.ast import GNode, ProdNode, SentNode, SymbolNode
 from pycmp.grammar import Grammar, Production, Sentence, Symbol
 from utils import visitor
 
 # TODO: Refactor
-
-
-def evaluate(node):
-    grammar = Grammar()
-    register_start_symbol(node, grammar)
-    register_nonterminals(node, grammar)
-    register_terminals(node, grammar)
-    register_productions(node, grammar)
-    return grammar
-
 
 # region Register start symbol
 

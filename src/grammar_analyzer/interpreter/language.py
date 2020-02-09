@@ -1,5 +1,49 @@
 from pycmp.grammar import Grammar
-from grammar_analyzer.input.ast import GNode, ProdNode, SentNode, SymbolNode
+from pycmp.lexer import Lexer
+from pycmp.parsing import LR1Parser
+
+
+class GNode(object):
+    def __init__(self, productions):
+        self.productions = tuple(productions)
+
+
+class ProdNode(object):
+    def __init__(self, head, body):
+        self.head = head
+        self.body = body
+
+
+class SentNode(object):
+    def __init__(self, symbols):
+        self.symbols = tuple(symbols)
+
+
+class SymbolNode(object):
+    def __init__(self, lex):
+        self.lex = lex
+
+
+def build_input_lexer(eps, union, arrow, eol, symbol, eof):
+    digits = "|".join(str(n) for n in range(10))
+    letters = "|".join(chr(n) for n in range(ord("a"), ord("z") + 1))
+    others = "|".join([r"\(", r"\)"])
+    symbols = f"{letters}|{digits}|{others}"
+    ignore = "__ignore__"
+
+    lexer = Lexer(
+        [
+            (eps, "eps"),
+            (union, r"\|"),
+            (arrow, "->"),
+            (eol, "\\n"),
+            (ignore, "  *"),
+            (symbol, f"({symbols})({symbols})*"),
+        ],
+        eof,
+    )
+
+    return lambda text: [t for t in lexer(text) if t.ttype != ignore]
 
 
 def build_input_grammar():
@@ -35,4 +79,13 @@ def build_input_grammar():
     return input_grammar
 
 
-input_grammar = build_input_grammar()
+grammar = build_input_grammar()
+lexer = build_input_lexer(
+    eps=grammar["eps"],
+    union=grammar["|"],
+    arrow=grammar["->"],
+    eol=grammar["eol"],
+    symbol=grammar["symbol"],
+    eof=grammar.eof,
+)
+parser = LR1Parser(grammar)
