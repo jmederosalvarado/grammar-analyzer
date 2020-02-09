@@ -1,3 +1,7 @@
+from grammar_analyzer.input.ast import GNode, ProdNode, SentNode, SymbolNode
+from pycmp.grammar import Grammar, Production, Sentence, Symbol
+from utils import visitor
+
 # TODO: Refactor this visitors
 
 
@@ -8,6 +12,9 @@ def evaluate(node):
     register_terminals(node, grammar)
     register_productions(node, grammar)
     return grammar
+
+
+# region Register start symbol
 
 
 @visitor.on("node")
@@ -28,6 +35,11 @@ def register_start_symbol_prod(node, grammar):
 @register_start_symbol.when(SymbolNode)
 def register_start_symbol_symbol(node, grammar):
     grammar.add_nonterminal(node.lex, True)
+
+
+# endregion
+
+# region Register non terminals
 
 
 @visitor.on("node")
@@ -52,6 +64,11 @@ def register_nonterminals_symbol(node, grammar):
         grammar.add_nonterminal(node.lex)
 
 
+# endregion
+
+# region Register terminals
+
+
 @visitor.on("node")
 def register_terminals(node, grammar):
     pass
@@ -61,11 +78,6 @@ def register_terminals(node, grammar):
 def register_terminals_gnode(node, grammar):
     for prod in node.productions:
         register_terminals(prod, grammar)
-
-
-from utils import visitor
-from pycmp.grammar import Grammar, Production, Symbol, Sentence
-from grammar_analyzer.input.ast import GNode, ProdNode, SentNode, SymbolNode
 
 
 @register_terminals.when(ProdNode)
@@ -85,6 +97,11 @@ def register_terminals_symbol(node, grammar):
         grammar.add_terminal(node.lex)
 
 
+# endregion
+
+# region Register productions
+
+
 @visitor.on("node")
 def register_productions(node, grammar):
     pass
@@ -95,6 +112,11 @@ def register_productions_gnode(node, grammar):
     prods = [eval_node(p, grammar) for p in node.productions]
     for prod in prods:
         grammar.add_production(prod)
+
+
+# endregion
+
+# region Evaluate nodes
 
 
 @visitor.on("node")
@@ -118,3 +140,6 @@ def eval_node_sent(node, grammar):
 @eval_node.when(SymbolNode)
 def eval_node_symbol(node, grammar):
     return grammar[node.lex]
+
+
+# endregion
