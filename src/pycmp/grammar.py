@@ -362,9 +362,10 @@ class Grammar:
             for s in p.right:
                 body.append(s.name)
 
-            productions.append({"Head": head, "Body": body})
+            productions.append({"head": head, "body": body})
 
         d = {
+            "start_symbol": self.start_symbol.name,
             "nonterminals": [symb.name for symb in self.nonterminals],
             "terminals": [symb.name for symb in self.terminals],
             "productions": productions,
@@ -388,6 +389,11 @@ class Grammar:
         for p in data["productions"]:
             head = p["head"]
             dic[head] %= Sentence(*[dic[term] for term in p["body"]])
+
+        start_symbol = data["start_symbol"]
+        g.start_symbol = dic[start_symbol]
+
+        g.ptype = Production
 
         return g
 
