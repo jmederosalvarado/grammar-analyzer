@@ -2,7 +2,7 @@ from grammar_analyzer.input.ast import GNode, ProdNode, SentNode, SymbolNode
 from pycmp.grammar import Grammar, Production, Sentence, Symbol
 from utils import visitor
 
-# TODO: Refactor this visitors
+# TODO: Refactor
 
 
 def evaluate(node):
