@@ -4,7 +4,7 @@ from grammar_analyzer.interpreter.evaluation import (
     register_start_symbol,
     register_terminals,
 )
-from grammar_analyzer.interpreter.utils import lexer, parser
+from grammar_analyzer.interpreter.language import lexer, parser
 from pycmp.evaluation import evaluate_reverse_parse
 from pycmp.grammar import Grammar
 from pycmp.parsing import LR1Parser

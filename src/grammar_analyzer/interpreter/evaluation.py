@@ -1,5 +1,5 @@
-from grammar_analyzer.interpreter.ast import GNode, ProdNode, SentNode, SymbolNode
-from pycmp.grammar import Grammar, Production, Sentence, Symbol
+from grammar_analyzer.interpreter.language import GNode, ProdNode, SentNode, SymbolNode
+from pycmp.grammar import Production, Sentence
 from utils import visitor
 
 # TODO: Refactor

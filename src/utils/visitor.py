@@ -1,6 +1,6 @@
 from inspect import signature
 
-registry = {}
+registry = {}  # type: dict
 
 
 class Visitor(object):
