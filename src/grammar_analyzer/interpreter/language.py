@@ -24,6 +24,11 @@ class SymbolNode(object):
         self.lex = lex
 
 
+class EpsNode(SymbolNode):
+    def __init__(self, lex):
+        self.lex = None
+
+
 def build_input_lexer(eps, union, arrow, eol, symbol, eof):
     digits = "|".join(str(n) for n in range(10))
     letters = "|".join(chr(n) for n in range(ord("a"), ord("z") + 1))
@@ -75,7 +80,7 @@ def build_input_grammar():
     sent_list %= sent + union + sent_list, lambda h, s: [s[1]] + s[3]
     sent_list %= sent, lambda h, s: [s[1]]
     sent %= symbol_list, lambda h, s: SentNode(s[1])
-    sent %= eps, lambda h, s: SentNode([s[1]])
+    sent %= eps, lambda h, s: SentNode([EpsNode(s[1])])
     symbol_list %= symbol + symbol_list, lambda h, s: [SymbolNode(s[1])] + s[2]
     symbol_list %= symbol, lambda h, s: [SymbolNode(s[1])]
 

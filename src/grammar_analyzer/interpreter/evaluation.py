@@ -1,4 +1,10 @@
-from grammar_analyzer.interpreter.language import GNode, ProdNode, SentNode, SymbolNode
+from grammar_analyzer.interpreter.language import (
+    GNode,
+    ProdNode,
+    SentNode,
+    SymbolNode,
+    EpsNode,
+)
 from pycmp.grammar import Production, Sentence
 from utils import visitor
 
@@ -50,7 +56,7 @@ def register_nonterminals_prod(node, grammar):
 
 @register_nonterminals.when(SymbolNode)
 def register_nonterminals_symbol(node, grammar):
-    if node.lex not in grammar.nonterminals:
+    if grammar[node.lex] is None:
         grammar.add_nonterminal(node.lex)
 
 
@@ -84,7 +90,13 @@ def register_terminals_sent(node, grammar):
 @register_terminals.when(SymbolNode)
 def register_terminals_symbol(node, grammar):
     if node.lex not in grammar.nonterminals:
-        grammar.add_terminal(node.lex)
+        if grammar[node.lex] is None:
+            grammar.add_terminal(node.lex)
+
+
+@register_terminals.when(EpsNode)
+def register_terminals_eps(node, grammar):
+    return
 
 
 # endregion
@@ -130,6 +142,11 @@ def eval_node_sent(node, grammar):
 @eval_node.when(SymbolNode)
 def eval_node_symbol(node, grammar):
     return grammar[node.lex]
+
+
+@eval_node.when(EpsNode)
+def eval_node_eps(node, grammar):
+    return grammar.epsilon
 
 
 # endregion
