@@ -65,18 +65,26 @@ def build_input_grammar():
     )
     symbol, arrow, union, eps, eol = input_grammar.add_terminals("symbol -> | eps eol")
 
-    grammar %= prod_list, lambda h, s: GNode(s[0])
-    prod_list %= prod + eol + prod_list, lambda h, s: s[0] + s[1]
-    prod_list %= prod, lambda h, s: s[0]
-    prod %= symbol + arrow + sent_list, lambda h, s: [ProdNode(s[0], i) for i in s[2]]
-    sent_list %= sent + union + sent_list, lambda h, s: lambda h, s: [s[0]] + s[2]
-    sent_list %= sent, lambda h, s: [s[0]]
-    sent %= symbol_list, lambda h, s: SentNode(s[0])
-    sent %= eps, lambda h, s: SentNode([s[0]])
-    symbol_list %= symbol + symbol_list, lambda h, s: [SymbolNode(s[0])] + s[1]
-    symbol_list %= symbol, lambda h, s: [SymbolNode(s[0])]
+    grammar %= prod_list, lambda h, s: GNode(s[1])
+    prod_list %= prod + eol + prod_list, lambda h, s: s[1] + s[2]
+    prod_list %= prod, lambda h, s: s[1]
+    prod %= (
+        symbol + arrow + sent_list,
+        lambda h, s: [ProdNode(SymbolNode(s[1]), i) for i in s[3]],
+    )
+    sent_list %= sent + union + sent_list, lambda h, s: [s[1]] + s[3]
+    sent_list %= sent, lambda h, s: [s[1]]
+    sent %= symbol_list, lambda h, s: SentNode(s[1])
+    sent %= eps, lambda h, s: SentNode([s[1]])
+    symbol_list %= symbol + symbol_list, lambda h, s: [SymbolNode(s[1])] + s[2]
+    symbol_list %= symbol, lambda h, s: [SymbolNode(s[1])]
 
     return input_grammar
+
+
+def build_input_parser(grammar):
+    parser = LR1Parser(grammar)
+    return lambda tokens: parser([t.ttype for t in tokens], return_actions=True)
 
 
 grammar = build_input_grammar()
@@ -88,4 +96,4 @@ lexer = build_input_lexer(
     symbol=grammar["symbol"],
     eof=grammar.eof,
 )
-parser = LR1Parser(grammar)
+parser = build_input_parser(grammar)

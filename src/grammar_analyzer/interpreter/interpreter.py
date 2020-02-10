@@ -12,7 +12,7 @@ from pycmp.parsing import LR1Parser
 
 def eval_input(text):
     tokens = lexer(text)
-    parse, actions = parser(tokens, return_actions=True)
+    parse, actions = parser(tokens)
     ast = evaluate_reverse_parse(parse, actions, tokens)
     return evaluate_ast(ast)
 
