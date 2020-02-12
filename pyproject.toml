@@ -5,15 +5,22 @@ description = ""
 authors = ["Jorge Mederos Alvarado <jmederosalvarado@gmail.com>"]
 packages = [
 	{include = "grammar_analyzer", from = "src"},
+	{include = "pycmp", from = "src"},
+	{include = "utils", from = "src"},
 ]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+pydot = "^1.4.1"
+streamlit = "^0.54.0"
+click = "^7.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
-autopep8 = "^1.5"
 pylint = "^2.4.4"
+black = {version = "^19.10b0", allow-prereleases = true}
+mypy = "^0.761"
+rope = "^0.16.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
