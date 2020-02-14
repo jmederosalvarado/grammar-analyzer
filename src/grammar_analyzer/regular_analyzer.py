@@ -1,4 +1,33 @@
-from pycmp.automata import NFA
+from pycmp.grammar import Grammar
+from pycmp.automata import NFA, DFA
+
+
+def check_regular_grammar(grammar: Grammar):
+    for _, right in grammar.productions:
+        if not right[0].is_terminal:
+            return False
+        if len(right) >= 2 and not right[1].is_nonterminal:
+            return False
+        if len(right) > 2:
+            return False
+    return True
+
+
+def grammar_to_automaton(grammar: Grammar):
+    nonterminals = (nt for nt in grammar.nonterminals if nt != grammar.start_symbol)
+    state_map = {nt: i + 1 for i, nt in enumerate(nonterminals)}
+    state_map[grammar.start_symbol] = 0
+
+    states = final = len(grammar.nonterminals)
+    transitions = {}
+
+    for left, right in grammar.productions:
+        origin = state_map[left]
+        symbol = right[0].name
+        dest = state_map[right[1]] if len(right) == 2 else final
+        transitions[origin, symbol] = dest
+
+    return DFA(states, {final}, transitions)
 
 
 def automaton_to_regex(automaton: NFA) -> str:
