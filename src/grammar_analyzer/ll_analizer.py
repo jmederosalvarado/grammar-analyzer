@@ -1,5 +1,5 @@
 from pycmp.grammar import Grammar
-from pycmp.parsing import compute_firsts, compute_follows, build_ll_table
+from pycmp.parsing import compute_firsts, compute_follows, build_ll_table, build_ll_parser
 
 
 # Returns bool : True if the grammar is LL(1), False otherwise
@@ -26,7 +26,7 @@ def table_analize(G):
 def report_conflict(G):
     graph = []
     graph.append(Node("epsilon"))
-    exists_conflicts, conflicts, table = table_analize(grammar)
+    exists_conflicts, conflicts, table = table_analize(G)
 
     _ = build_graph(G, G.start_symbol, graph, table, [])
 
@@ -158,17 +158,7 @@ def build_chain(G, graph, conflicts):
     return chain
 
 
-grammar = Grammar()
-E = grammar.add_nonterminal("E", True)
-T, Z, X, Y = grammar.add_nonterminals("T Z X Y")
-plus, num = grammar.add_terminals("+ num")
-
-E %= T + Z, lambda h, s: s[2], None, lambda h, s: s[1]
-
-T %= num, lambda h, s: float(s[1]), None
-Z %= X, lambda h, s: s[1], None,
-Z %= Y, lambda h, s: s[1], None,
-X %= plus, lambda h, s: "+", None
-Y %= plus, lambda h, s: "+", None
-
-print(str(report_conflict(grammar)))
+class TreeNode:
+    def __init__(self, rep):
+        self.adj = []
+        self.rep = rep
