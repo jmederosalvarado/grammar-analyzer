@@ -55,3 +55,26 @@ def slr_table_analizer(G):
             conflicts.append((key, "production never reached"))
 
     return conflicts
+
+
+class DerivationTreeNode(object):
+    def init(self, value, children=None):
+        self.value = value
+        self.children = children or []
+
+
+def build_derivation_tree(right_parse, i=-1):
+    if i == -1:
+        i = len(right_parse - 1)
+
+    production = right_parse[i]
+    node = DerivationTreeNode(production.Left)
+
+    sentence = production.right
+    for s in range(sentence, 0, -1):
+        if sentence[s].IsTerminal or sentence[s].IsEpsilon:
+            node.children.append(DerivationTreeNode(sentence[s]))
+        else:
+            i, child = build_derivation_tree(right_parse, i - 1)
+            node.children.append(child)
+    return i, node
