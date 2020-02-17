@@ -2,13 +2,18 @@ from pycmp.grammar import Grammar
 from pycmp.parsing import ShiftReduceParser, SLR1Parser
 
 
-def slr_table_analizer(G):
-    parser = SLR1Parser(G)
+class _SLR1Parser(SLR1Parser):
+    @staticmethod
+    def _register(table, key, value):
+        if key not in table:
+            table[key] = []
+        if not value in table[key]:
+            table[key].append(value)
 
-    try:
-        parser._build_parsing_table()
-    except AssertionError:
-        return None, "Shift-Reduce or Reduce-Reduce conflict!!!"  #To Do
+
+def slr_table_analizer(G):
+    parser = _SLR1Parser(G)
+    parser._build_parsing_table()
 
     conflicts = []
 
@@ -23,15 +28,23 @@ def slr_table_analizer(G):
     for key in action:
         states[key[0]] = False
 
-    for key, value in goto:
-        states[value] = True
+    for key, values in goto:
+        if len(value) > 1:
+            conflicts.append(key, "Shift-Reduce or Reduce-Reduce conflict!!!")
+        for value in values:
+            states[value] = True
 
-    for key, value in action:
-        if value[0] == parser.REDUCE:
-            productions[value[1]] = True
+    for key, values in action:
+        if len(value) > 1:
+            conflicts.append(key, "Shift-Reduce or Reduce-Reduce conflict!!!")
 
-        if value[0] == parser.SHIFT:
-            states[value[1]] = True
+        for value in values:
+
+            if value[0] == parser.REDUCE:
+                productions[value[1]] = True
+
+            if value[0] == parser.SHIFT:
+                states[value[1]] = True
 
     for key, value in states:
         if not value:
