@@ -14,11 +14,13 @@ class Visitor(object):
         return function(*args)
 
     def register(self, types, function):
-        assert types not in self.typemap
+        assert types not in self.typemap, "Already registered types"
         self.typemap[types] = function
 
     def when(self, *types):
-        assert len(types) == len(self.params)
+        assert len(types) == len(
+            self.params
+        ), "The amout of types must match the amount of parameters"
 
         def register(function):
             self.register(types, function)
@@ -33,7 +35,6 @@ def on(*argnames):
         params = signature(function).parameters
         params = [i for i, p in enumerate(params) if p in argnames]
 
-        assert name not in registry
         registry[name] = Visitor(params)
 
         return registry[name]
