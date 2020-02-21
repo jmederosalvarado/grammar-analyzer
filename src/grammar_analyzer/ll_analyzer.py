@@ -1,10 +1,50 @@
 from pycmp.grammar import Grammar
-from pycmp.parsing import compute_firsts, compute_follows, build_ll_table, build_ll_parser
+from pycmp.parsing import (
+    compute_firsts,
+    compute_follows,
+    build_ll_table,
+    build_ll_parser,
+)
 
 
-# Returns bool : True if the grammar is LL(1), False otherwise
-#         list of conflicts if exists
-#         dictionary: parsing table
+def build_conflict_str(start, table, terminals):
+    return __build_conflict_str([start], table, terminals, set())
+
+
+def __build_conflict_str(stack, table, terminals, visited):
+    if len(stack) == 0:
+        return None
+
+    top = stack.pop()
+
+    if top.is_terminal:
+        conflict = __build_conflict_str(stack, table, terminals, visited)
+        if conflict is None:
+            return None
+        return [top] + conflict
+
+    for t in terminals:
+        if (top, t) in visited:
+            continue
+        try:
+            production = table[top, t]
+        except KeyError:
+            continue
+        if len(production) > 1:
+            return [t]
+        production = production[0]
+        visited.add((top, t))
+        conflict = __build_conflict_str(
+            stack + list(reversed(production.right)), table, terminals, visited
+        )
+        visited.remove((top, t))
+        if conflict is None:
+            continue
+        return conflict
+
+    return None
+
+
 def table_analize(G):
     firsts = compute_firsts(G)
     follows = compute_follows(G, firsts)
@@ -40,7 +80,7 @@ def build_graph(G, actual, graph, table, pending):
         v = graph[0]
         if len(pending) > 0:
             if len(pending) > 1:
-                pending = pending[1:len(pending)]
+                pending = pending[1 : len(pending)]
             else:
                 pending = []
 
@@ -54,7 +94,7 @@ def build_graph(G, actual, graph, table, pending):
         if actual.name == v.rep:
             if len(pending) > 0:
                 if len(pending) > 1:
-                    pending = pending[1:len(pending)]
+                    pending = pending[1 : len(pending)]
                 else:
                     pending = []
 
@@ -72,7 +112,7 @@ def build_graph(G, actual, graph, table, pending):
         if len(pending) > 0:
             actual = pending[0]
             if len(pending) > 1:
-                newpending = pending[1:len(pending)]
+                newpending = pending[1 : len(pending)]
             else:
                 newpending = []
 
@@ -90,9 +130,8 @@ def build_graph(G, actual, graph, table, pending):
         if r == actual:
             for item in table[key]:
 
-                if (item.right.is_epsilon):
-                    new_node = build_graph(G, symbols[0], graph, table,
-                                           newpending)
+                if item.right.is_epsilon:
+                    new_node = build_graph(G, symbols[0], graph, table, newpending)
                     if not node in new_node.adj and node != new_node:
                         new_node.adj.append(node)
                         node.adj.append(new_node)
@@ -101,7 +140,7 @@ def build_graph(G, actual, graph, table, pending):
                 symbols = item.right._symbols
 
                 if len(symbols) > 0:
-                    newpending = list(symbols[1:len(symbols)]) + pending
+                    newpending = list(symbols[1 : len(symbols)]) + pending
                 new_node = build_graph(G, symbols[0], graph, table, newpending)
                 if not node in new_node.adj and node != new_node:
                     new_node.adj.append(node)
@@ -150,7 +189,7 @@ def build_chain(G, graph, conflicts):
 
     chain = ""
     actual = dest_node
-    while (actual != -1):
+    while actual != -1:
         chain = chain + actual.write
         actual = pi[actual]
 
