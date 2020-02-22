@@ -25,17 +25,26 @@ def enhacement_analysis():
     pass
 
 
-def run():
-    st.title("Grammar Analyzer")
-
+def input_grammar():
     input_text = st.text_area(
         label="Please input your grammar here",
         value="balanced -> ( balanced ) | balanced ( ) | ( ) balanced | eps",
     )
     grammar = eval_input(input_text)
-    option = st.sidebar.selectbox(
+    return grammar
+
+
+def run():
+    st.title("Grammar Analyzer")
+
+    grammar = input_grammar()
+
+    if grammar is None:
+        return
+
+    option = st.selectbox(
         label="Select type of analysis to be made",
-        options=("Input grammar", "LL", "SLR", "LR", "Regular", "Enhancement"),
+        options=("LL", "SLR", "LR", "Regular", "Enhancement"),
     )
 
     if option == "LL":
@@ -52,8 +61,6 @@ def run():
 
     if option == "Enhancement":
         enhacement_analysis()
-
-    st.json(grammar.to_json)
 
 
 if __name__ == "__main__":
