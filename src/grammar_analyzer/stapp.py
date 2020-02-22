@@ -8,7 +8,10 @@ from grammar_analyzer.stutils import stformat
 
 
 def basic_analysis(grammar):
-    pass
+    firsts = compute_firsts(grammar)
+    follows = compute_follows(grammar, firsts)
+    st.write("Firsts:", stformat(firsts))
+    st.write("Follows:", stformat(follows))
 
 
 def ll_analysis(grammar):
@@ -66,7 +69,7 @@ def run():
     )
 
     function = options[option]
-    function()
+    function(grammar)
 
 
 if __name__ == "__main__":
