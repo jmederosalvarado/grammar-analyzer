@@ -1,27 +1,33 @@
 import streamlit as st
 from grammar_analyzer.interpreter import eval_input
 from pycmp.exceptions import ParsingError
+from pycmp.parsing import compute_firsts, compute_follows
+from grammar_analyzer.stutils import stformat
 
 # pylint: disable=no-value-for-parameter
 
 
-def ll_analysis():
+def basic_analysis(grammar):
     pass
 
 
-def slr_analysis():
+def ll_analysis(grammar):
     pass
 
 
-def lr_analysis():
+def slr_analysis(grammar):
     pass
 
 
-def regular_analysis():
+def lr_analysis(grammar):
     pass
 
 
-def enhacement_analysis():
+def regular_analysis(grammar):
+    pass
+
+
+def enhacement_analysis(grammar):
     pass
 
 
@@ -34,6 +40,17 @@ def input_grammar():
     return grammar
 
 
+def build_options():
+    return {
+        "Basic": basic_analysis,
+        "LL": ll_analysis,
+        "SLR": slr_analysis,
+        "LR": lr_analysis,
+        "Regular": regular_analysis,
+        "Enhancement": enhacement_analysis,
+    }
+
+
 def run():
     st.title("Grammar Analyzer")
 
@@ -42,25 +59,14 @@ def run():
     if grammar is None:
         return
 
+    options = build_options()
+
     option = st.selectbox(
-        label="Select type of analysis to be made",
-        options=("LL", "SLR", "LR", "Regular", "Enhancement"),
+        label="Select type of analysis to be made", options=tuple(options),
     )
 
-    if option == "LL":
-        ll_analysis()
-
-    if option == "SLR":
-        slr_analysis()
-
-    if option == "LR":
-        lr_analysis()
-
-    if option == "Regular":
-        regular_analysis()
-
-    if option == "Enhancement":
-        enhacement_analysis()
+    function = options[option]
+    function()
 
 
 if __name__ == "__main__":

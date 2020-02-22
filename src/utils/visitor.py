@@ -4,13 +4,14 @@ registry = {}  # type: dict
 
 
 class Visitor(object):
-    def __init__(self, params):
+    def __init__(self, params, default=None):
         self.params = params
         self.typemap = {}
+        self.default = default
 
     def __call__(self, *args):
         types = tuple(args[i].__class__ for i in self.params)
-        function = self.typemap[types]
+        function = self.typemap.get(types, self.default)
         return function(*args)
 
     def register(self, types, function):
@@ -35,7 +36,7 @@ def on(*argnames):
         params = signature(function).parameters
         params = [i for i, p in enumerate(params) if p in argnames]
 
-        registry[name] = Visitor(params)
+        registry[name] = Visitor(params, default=function)
 
         return registry[name]
 
