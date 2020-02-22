@@ -49,11 +49,6 @@ def direct_recursion_eliminate(d: dict):
 
 
 def general_recursion_eliminate(G):
-    new_productions = []
-
-    for p in G.productions:
-        new_productions.append(p)
-
     terminals = [t.name for t in G.terminals]
 
     S, d = grammar_to_graph(G)
@@ -68,9 +63,6 @@ def general_recursion_eliminate(G):
 
                     for _sentence in d[terminals[j]]:
                         d[i].append(_sentence + [new_sentence])
-
-        for key, value in d.items():
-            new_productions.append((key, value))
 
         d = direct_recursion_eliminate(d)
 
