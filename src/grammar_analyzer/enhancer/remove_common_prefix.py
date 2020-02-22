@@ -43,32 +43,33 @@ class Trie:
         return productions
 
 
-#Transforms a grammar in an equivalent grammar with no common prefixes
-# def remove_common_prefixes(G: Grammar):
-#     for A in G.nonTerminals.copy():
-#         trie = Trie(A)
-#         prefix_nodes = [n for n in trie.prefix_nodes]
-#         prefix_nodes.sort(key=lambda x: x.depth, reverse=True)
+def remove_common_prefixes(G: Grammar):
+    for A in G.nonTerminals.copy():
+        trie = Trie(A)
+        prefix_nodes = [n for n in trie.prefix_nodes]
+        prefix_nodes.sort(key=lambda x: x.depth, reverse=True)
 
-#         for n in prefix_nodes:  #get the longest common prefix among the productions be the prefix α
-#             productions = trie.get_node_productions(
-#                 n)  #get all the productions with that prefix
-#             n.children.clear()
+        for n in prefix_nodes:  #get the longest common prefix among the productions be the prefix α
+            productions = trie.get_node_productions(
+                n)  #get all the productions with that prefix
+            n.children.clear()
 
-#             #A -> α ω1 | α ω2 | ... | α ωΝ
-#             #replace those productions with
-#             #A -> αA'
-#             #A' -> ω1 | ω2 | ... | ωΝ
+            #A -> α ω1 | α ω2 | ... | α ωΝ
+            #replace those productions with
+            #A -> αA'
+            #A' -> ω1 | ω2 | ... | ωΝ
 
-#             A_new = G.NonTerminal(new_symbol_name(G, A), False)
-#             A %= Sentence(*islice(productions[0].Right, 0, n.depth +
-#                                   1)) + A_new
-#             n.productions = [A.productions[-1]]
+            A_new = G.NonTerminal(A.name + "'", False)
+            A %= Sentence(*productions[0].Right._symbols[0, n.depth + 1],
+                          A_new)
+            n.productions = [A.productions[-1]]
 
-#             for p in productions:
-#                 if len(p.Right) > n.depth + 1:
-#                     A_new %= Sentence(*islice(p.Right, n.depth + 1, None))
-#                 else:
-#                     A_new %= G.Epsilon
-#                 A.productions.remove(p)
-#                 G.Productions.remove(p)
+            for p in productions:
+                if len(p.Right) > n.depth + 1:
+                    A_new %= Sentence(
+                        *p.Right._symbols[n.depth + 1,
+                                          len(productions[0].Right._symbols)])
+                else:
+                    A_new %= G.Epsilon
+                A.productions.remove(p)
+                G.Productions.remove(p)
