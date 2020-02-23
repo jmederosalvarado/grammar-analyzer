@@ -6,6 +6,8 @@ from grammar_analyzer.shift_reduce_analyzer import (
 )
 from grammar_analyzer.common import build_derivation_tree
 
+# TODO: Refactor lr and slr analyzers to share more code
+
 
 class __LR1ParserConflicts(LR1Parser):
     def __call__(self, tokens, return_actions=False):
