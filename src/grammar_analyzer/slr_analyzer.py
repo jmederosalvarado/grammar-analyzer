@@ -6,6 +6,8 @@ from grammar_analyzer.shift_reduce_analyzer import (
 )
 from grammar_analyzer.common import build_derivation_tree
 
+# TODO: Refactor all shift-reduce analyzers to share common code
+
 
 class __SLR1ParserConflicts(SLR1Parser):
     def __call__(self, tokens, return_actions=False):
