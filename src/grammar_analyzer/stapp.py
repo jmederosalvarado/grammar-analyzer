@@ -1,17 +1,12 @@
 import streamlit as st
 from grammar_analyzer.interpreter import eval_input
-from pycmp.exceptions import ParsingError
-from pycmp.parsing import compute_firsts, compute_follows
 from grammar_analyzer.stutils import stformat
 
 # pylint: disable=no-value-for-parameter
 
 
 def basic_analysis(grammar):
-    firsts = compute_firsts(grammar)
-    follows = compute_follows(grammar, firsts)
-    st.write("Firsts:", stformat(firsts))
-    st.write("Follows:", stformat(follows))
+    pass
 
 
 def ll_analysis(grammar):

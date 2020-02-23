@@ -1,13 +1,28 @@
+import pydot
+from functools import lru_cache
 from pycmp.grammar import Grammar
-from pycmp.parsing import (
-    compute_firsts,
-    compute_follows,
-    build_ll_table,
-    build_ll_parser,
-)
+from pycmp.parsing import build_ll_table as __build_ll_table
+from pycmp.parsing import build_ll_parser
+from grammar_analyzer.basic_analyzer import compute_firsts, compute_follows
 
 
-def build_conflict_str(start, table, terminals):
+@lru_cache
+def is_ll_grammar(grammar):
+    table = build_ll_table(grammar)
+    return not any(len(v) > 1 for v in table.values())
+
+
+@lru_cache
+def build_ll_table(grammar):
+    firsts = compute_firsts(grammar)
+    follows = compute_follows(grammar)
+    return __build_ll_table(grammar, firsts, follows)
+
+
+@lru_cache
+def build_conflict_str(grammar):
+    table = build_ll_table(grammar)
+    start, terminals = grammar.start_symbol, grammar.terminals
     return __build_conflict_str([start], table, terminals, set())
 
 
@@ -37,7 +52,6 @@ def __build_conflict_str(stack, table, terminals, visited):
         conflict = __build_conflict_str(
             stack + list(reversed(production.right)), table, terminals, visited
         )
-        visited.remove((top, t))
         if conflict is None:
             continue
         return conflict
@@ -45,159 +59,25 @@ def __build_conflict_str(stack, table, terminals, visited):
     return None
 
 
-def table_analize(G):
-    firsts = compute_firsts(G)
-    follows = compute_follows(G, firsts)
+def get_derivation_tree_builder(grammar):
+    table = build_ll_table(grammar)
+    parser = build_ll_parser(grammar, table=table)
 
-    table = build_ll_table(G, firsts, follows)
+    @lru_cache
+    def tree_builder(tokens):
+        left_parse = parser(tokens)
+        tree = pydot.Graph(graph_type="graph")
+        __build_tree(iter(left_parse), tree)
+        return tree
 
-    conflicts = []
-
-    for key, value in table.items():
-        if len(value) > 1:
-            conflicts.append((key, value))
-
-    if len(conflicts) > 0:
-        return True, conflicts, table
-
-    return False, conflicts, table
+    return tree_builder
 
 
-def report_conflict(G):
-    graph = []
-    graph.append(Node("epsilon"))
-    exists_conflicts, conflicts, table = table_analize(G)
-
-    _ = build_graph(G, G.start_symbol, graph, table, [])
-
-    if exists_conflicts:
-        chain = build_chain(G, graph, conflicts)
-    return chain
-
-
-def build_graph(G, actual, graph, table, pending):
-    if actual.is_epsilon:
-        v = graph[0]
-        if len(pending) > 0:
-            if len(pending) > 1:
-                pending = pending[1 : len(pending)]
-            else:
-                pending = []
-
-            new_node = build_graph(G, actual, graph, table, pending)
-            if not v in new_node.adj and v != new_node:
-                new_node.adj.append(v)
-                v.adj.append(new_node)
-        return v
-
-    for v in graph:
-        if actual.name == v.rep:
-            if len(pending) > 0:
-                if len(pending) > 1:
-                    pending = pending[1 : len(pending)]
-                else:
-                    pending = []
-
-                new_node = build_graph(G, actual, graph, table, pending)
-
-                if not v in new_node.adj and v != new_node:
-                    new_node.adj.append(v)
-                    v.adj.append(new_node)
-            return v
-
-    if actual.is_terminal:
-        node = Node(actual.name, actual.name)
-        graph.append(node)
-
-        if len(pending) > 0:
-            actual = pending[0]
-            if len(pending) > 1:
-                newpending = pending[1 : len(pending)]
-            else:
-                newpending = []
-
-            new_node = build_graph(G, actual, graph, table, newpending)
-            if not node in new_node.adj and node != new_node:
-                new_node.adj.append(node)
-                node.adj.append(new_node)
-
-        return node
-
-    node = Node(actual.name)
-    graph.append(node)
-    for key in table:
-        r, _ = key
-        if r == actual:
-            for item in table[key]:
-
-                if item.right.is_epsilon:
-                    new_node = build_graph(G, symbols[0], graph, table, newpending)
-                    if not node in new_node.adj and node != new_node:
-                        new_node.adj.append(node)
-                        node.adj.append(new_node)
-                    continue
-
-                symbols = item.right._symbols
-
-                if len(symbols) > 0:
-                    newpending = list(symbols[1 : len(symbols)]) + pending
-                new_node = build_graph(G, symbols[0], graph, table, newpending)
-                if not node in new_node.adj and node != new_node:
-                    new_node.adj.append(node)
-                    node.adj.append(new_node)
-
-    return node
-
-
-class Node:
-    def __init__(self, represent, write=""):
-        self.adj = []
-        self.rep = represent
-        self.write = write
-
-    def __str__(self):
-        return self.rep
-
-    def __repr__(self):
-        return self.rep
-
-
-def build_chain(G, graph, conflicts):
-
-    for n in graph:
-        if n.rep == str(conflicts[0][0][0]):
-            init_node = n
-        if n.rep == str(G.start_symbol):
-            dest_node = n
-
-    Q = [init_node]
-    d = {}
-    pi = {}
-    for v in graph:
-        d[v] = -1
-        pi[v] = -1
-
-    d[init_node] = 0
-
-    while len(Q) > 0:
-        u = Q.pop(0)
-        for v in u.adj:
-            if d[v] == -1:
-                d[v] = d[u] + 1
-                pi[v] = u
-                Q.append(v)
-
-    chain = ""
-    actual = dest_node
-    while actual != -1:
-        chain = chain + actual.write
-        actual = pi[actual]
-
-    chain = chain + str(conflicts[0][0][1])
-    return chain
-
-
-class TreeNode:
-    def __init__(self, rep):
-        self.adj = []
-        self.rep = rep
+def __build_tree(left_parse, tree):
+    production = next(left_parse)
+    node = production.left.name
+    for s in production.right:
+        if not s.is_terminal and not s.is_epsilon:
+            __build_tree(left_parse, tree)
+        edge = pydot.Edge(node, s.name)
+        tree.add_edge(edge)
