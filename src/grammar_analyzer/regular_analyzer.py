@@ -2,7 +2,7 @@ from pycmp.grammar import Grammar
 from pycmp.automata import NFA, DFA
 
 
-def check_regular_grammar(grammar: Grammar):
+def is_regular_grammar(grammar):
     for _, right in grammar.productions:
         if not right[0].is_terminal:
             return False
@@ -13,7 +13,7 @@ def check_regular_grammar(grammar: Grammar):
     return True
 
 
-def grammar_to_automaton(grammar: Grammar):
+def grammar_to_automaton(grammar):
     nonterminals = (nt for nt in grammar.nonterminals if nt != grammar.start_symbol)
     state_map = {nt: i + 1 for i, nt in enumerate(nonterminals)}
     state_map[grammar.start_symbol] = 0
@@ -30,12 +30,12 @@ def grammar_to_automaton(grammar: Grammar):
     return DFA(states, {final}, transitions)
 
 
-def automaton_to_regex(automaton: NFA) -> str:
-    states, transitions = to_gnfa(automaton)
-    return gnfa_to_regex(list(range(states)), transitions)
+def automaton_to_regex(automaton):
+    states, transitions = __automaton_to_gnfa(automaton)
+    return __gnfa_to_regex(list(range(states)), transitions)
 
 
-def gnfa_to_regex(states: list, transitions: dict) -> str:
+def __gnfa_to_regex(states, transitions):
     if len(states) == 2:
         return transitions[states[0], states[-1]]
 
@@ -51,10 +51,10 @@ def gnfa_to_regex(states: list, transitions: dict) -> str:
             )
             transitions[qi, qj] = f"(({r1})({r2})*({r3}))|({r4})"
 
-    return gnfa_to_regex(states, transitions)
+    return __gnfa_to_regex(states, transitions)
 
 
-def to_gnfa(automaton: NFA) -> tuple:
+def __automaton_to_gnfa(automaton):
     start, old_start = 0, 1
     final = automaton.states + old_start
     states = automaton.states + 2
