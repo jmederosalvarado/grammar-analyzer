@@ -2,7 +2,7 @@ from pycmp.grammar import Grammar, Sentence, Symbol, Production, NonTerminal
 from converter import grammar_to_graph, graph_to_grammar
 
 
-def direct_recursion_eliminate(d: dict):
+def __direct_recursion_eliminate(d: dict):
     new_productions = []
 
     for key, value in d.items():
@@ -49,21 +49,80 @@ def direct_recursion_eliminate(d: dict):
 
 
 def general_recursion_eliminate(G):
-    terminals = [t.name for t in G.terminals]
+    nonterminals = [t.name for t in G.nonterminals]
 
     S, d = grammar_to_graph(G)
 
-    for i in range(0, len(terminals)):
+    for i in range(0, len(nonterminals)):
         for j in range(0, i - 1):
 
-            for sentence in d[terminals[i]]:
-                if sentence[0] == terminals[j]:
+            for sentence in d[nonterminals[i]]:
+                if sentence[0] == nonterminals[j]:
                     d[i].remove(sentence)
                     new_sentence = sentence[1:len(sentence)]
 
-                    for _sentence in d[terminals[j]]:
+                    for _sentence in d[nonterminals[j]]:
                         d[i].append(_sentence + [new_sentence])
 
-        d = direct_recursion_eliminate(d)
+        d = __direct_recursion_eliminate(d)
+
+    return graph_to_grammar(S, d)
+
+
+def epsilon_productions_eliminate(G):
+    S, d = grammar_to_graph(G)
+    nonterminals = [t.name for t in G.nonterminals]
+
+    nullable = {}
+    nullable = __find_nullable_nonterminals(d, nullable, S, nonterminals)
+
+    for _, value in d.items():
+        for sentence in value:
+
+            if sentence[0] == "epsilon":
+                value.remove(sentence)
+
+            for i in range(0, len(sentence)):
+                if sentence[i] in nonterminals and nullable[sentence[i]]:
+                    new_sentence = sentence[0:i -
+                                            1] + sentence[1 + 1:len(sentence)]
+
+                    if not new_sentence in value:
+                        value.append(new_sentence)
+
+    if nullable[S]:
+        d[S].append(["epsilon"])
+
+    return graph_to_grammar(S, d)
+
+
+def __find_nullable_nonterminals(d, nullable, symbol, nonterminals):
+
+    try:
+        _ = nullable[symbol]
+        return nullable
+    except KeyError:
+        nullable[symbol] = False
+
+    for Sentence in d[symbol]:
+        local_nullable = True
+        for symb in Sentence:
+            if symb == "epsilon":
+                break
+            elif not symb in nonterminals:
+                local_nullable = False
+            else:
+                nullable = __find_nullable_nonterminals(
+                    d, nullable, symb, nonterminals)
+                local_nullable = local_nullable and nullable[symb]
+
+        nullable[symbol] = nullable[symbol] or local_nullable
+
+    return nullable
+
+
+def cycle_eliminate(G: Grammar):
+    S, d = grammar_to_graph(G)
+    nonterminals = [t.name for t in G.nonterminals]
 
     return graph_to_grammar(S, d)

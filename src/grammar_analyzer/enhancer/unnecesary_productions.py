@@ -4,31 +4,31 @@ from converter import grammar_to_graph, graph_to_grammar
 
 def unreachable_eliminate(G: Grammar):
     S, d = grammar_to_graph(G)
-    terminals = [t.name for t in G.terminals]
+    nonterminals = [t.name for t in G.nonterminals]
 
     mark = {}
 
     for p in d.keys():
         mark[p.left] = False
 
-    overlook(d, mark, terminals, G.start_symbol)
+    __overlook(d, mark, nonterminals, G.start_symbol)
 
-    for t in terminals:
+    for t in nonterminals:
         if not mark[t]:
             _ = d.pop(t)
 
     return graph_to_grammar(S, d)
 
 
-def overlook(d: dict, mark: dict, terminals: list, t):
+def __overlook(d: dict, mark: dict, nonterminals: list, t):
     mark[t] = True
     for sentence in d[t]:
         if len(sentence._symbols) == 1 and not sentence._symbols[
                 0].is_epsilon and sentence._symbols[0].is_nonterminal:
-            overlook(d, mark, terminals, sentence._symbols[0])
+            __overlook(d, mark, nonterminals, sentence._symbols[0])
 
 
-def useless_eliminate(G: Grammar):
+def unitary_eliminate(G: Grammar):
     S, d = grammar_to_graph(G)
 
     for _, value in d.items():
