@@ -1,7 +1,13 @@
-from pycmp.parsing import SLR1Parser
+from functools import lru_cache
+from pycmp.parsing import SLR1Parser, build_lr0_automaton
+from grammar_analyzer.shift_reduce_analyzer import (
+    shift_reduce_info,
+    build_conflict_str as __build_conflict_str,
+)
+from grammar_analyzer.common import build_derivation_tree
 
 
-class SLR1ParserConflicts(SLR1Parser):
+class __SLR1ParserConflicts(SLR1Parser):
     def __call__(self, tokens, return_actions=False):
         raise NotImplementedError()
 
@@ -13,60 +19,60 @@ class SLR1ParserConflicts(SLR1Parser):
             table[key].append(value)
 
 
-def build_conflict_str(action, goto, terminals, shift_act, reduce_act):
-    return __build_conflict_str(
-        [0], set(), action, goto, terminals, reduce_act, reduce_act
+@lru_cache
+def __build_slr_info(grammar):
+    parser_conflicts = __SLR1ParserConflicts(grammar)
+    automaton = build_lr0_automaton(grammar)
+    return shift_reduce_info(
+        automaton,
+        parser_conflicts.action,
+        parser_conflicts.goto,
+        __SLR1ParserConflicts.SHIFT,
+        __SLR1ParserConflicts.REDUCE,
     )
 
 
-def __build_conflict_str(
-    stack, visited, action_table, goto_table, terminals, shift_act, reduce_act
-):
-    state = stack[-1]
+@lru_cache
+def is_slr_grammar(grammar):
+    parser_info = __build_slr_info(grammar)
+    return not any(len(v) > 1 for v in parser_info.action_table.values())
 
-    for t in terminals:
-        if (state, t) in visited:
-            continue
 
-        try:
-            value = action[state, t]
-        except KeyError:
-            continue
+def build_slr_tables(grammar):
+    parser_info = __build_slr_info(grammar)
+    return parser_info.action_table, parser_info.goto_table
 
-        if len(value) > 1:
-            return [t]
 
-        action, tag = value[0]
+@lru_cache
+def build_conflict_str(grammar):
+    parser_info = __build_slr_info(grammar)
+    return __build_conflict_str(
+        parser_info.action_table,
+        parser_info.goto_table,
+        grammar.terminals,
+        parser_info.shift_act,
+        parser_info.reduce_act,
+    )
 
-        if action == shift_act:
-            visited.add((state, t))
-            conflict = __build_conflict_str(
-                stack + [tag],
-                visited,
-                action_table,
-                goto_table,
-                terminals,
-                shift_act,
-                reduce_act,
-            )
-            visited.remove((state, t))
-            if conflict is None:
-                return None
-            return [t] + conflict
 
-        if action == reduce_act:
-            visited.add((state, t))
-            temp_stack = stack[: -len(tag.right)]
-            conflict = __build_conflict_str(
-                temp_stack + [goto_table[temp_stack[-1], tag.left]],
-                visited,
-                action_table,
-                goto_table,
-                terminals,
-                shift_act,
-                reduce_act,
-            )
-            visited.remove((state, t))
-            return conflict
+@lru_cache
+def build_automaton(grammar):
+    parser_info = __build_slr_info(grammar)
+    return parser_info.automaton.graph()
 
-    return None
+
+def get_derivation_tree_builder(grammar):
+    parser = __build_slr_parser(grammar)
+
+    @lru_cache
+    def tree_builder(tokens):
+        parse = parser(tokens)
+        right_parse = reversed(parse)
+        return build_derivation_tree(right_parse, is_right_parse=True)
+
+    return tree_builder
+
+
+@lru_cache
+def __build_slr_parser(grammar):
+    return SLR1Parser(grammar)
