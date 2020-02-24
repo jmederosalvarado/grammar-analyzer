@@ -1,5 +1,35 @@
 from pycmp.grammar import Grammar, Sentence, Symbol, Production, NonTerminal
-from converter import grammar_to_graph, graph_to_grammar
+from grammar_analyzer.enhancer.converter import grammar_to_graph, graph_to_grammar
+from grammar_analyzer.enhancer.unnecesary_productions import unitary_eliminate, unreachable_eliminate
+
+
+def general_recursion_eliminate(G):
+    nonterminals = [t.name for t in G.nonterminals]
+
+    new_G = epsilon_productions_eliminate(G)
+    # new_G = unitary_eliminate(new_G)
+    # new_G = unreachable_eliminate(new_G)
+
+    S, d = grammar_to_graph(new_G)
+
+    for i in range(0, len(nonterminals)):
+        for j in range(0, i):
+
+            for sentence in d[nonterminals[i]]:
+                if sentence[0] == nonterminals[j]:
+                    d[nonterminals[i]].remove(sentence)
+                    remove_first = sentence[1:len(sentence)]
+
+                    for _sentence in d[nonterminals[j]]:
+                        new_sentence = []
+                        for item in _sentence:
+                            new_sentence.append(item)
+                        for item in remove_first:
+                            new_sentence.append(item)
+                        d[nonterminals[i]].append(new_sentence)
+        d = __direct_recursion_eliminate(d)
+
+    return graph_to_grammar(S, d)
 
 
 def __direct_recursion_eliminate(d: dict):
@@ -9,7 +39,9 @@ def __direct_recursion_eliminate(d: dict):
         recursion = []
         no_recursion = []
         for sentence in value:
-            if sentence._symbols[0] == key:
+            if sentence == []:
+                no_recursion.append(sentence)
+            elif sentence[0] == key:
                 recursion.append(sentence)
             else:
                 no_recursion.append(sentence)
@@ -20,7 +52,7 @@ def __direct_recursion_eliminate(d: dict):
 
         # there's some left recursion
         else:
-            X = (key.name + "'")
+            X = (key + "'")
 
             for sentence in no_recursion:
                 sentence.append(X)
@@ -35,38 +67,17 @@ def __direct_recursion_eliminate(d: dict):
                 new_sentence.append(X)
                 new_productions.append((X, new_sentence))
 
-            new_productions.append((X, ["epsilon"]))
+            new_productions.append((X, []))
 
     new_d = {}
 
     for p in new_productions:
         try:
-            new_d[p.left].append(p.right)
+            new_d[p[0]].append(p[1])
         except:
-            new_d[p.left] = [p.right]
+            new_d[p[0]] = [p[1]]
 
     return new_d
-
-
-def general_recursion_eliminate(G):
-    nonterminals = [t.name for t in G.nonterminals]
-
-    S, d = grammar_to_graph(G)
-
-    for i in range(0, len(nonterminals)):
-        for j in range(0, i - 1):
-
-            for sentence in d[nonterminals[i]]:
-                if sentence[0] == nonterminals[j]:
-                    d[i].remove(sentence)
-                    new_sentence = sentence[1:len(sentence)]
-
-                    for _sentence in d[nonterminals[j]]:
-                        d[i].append(_sentence + [new_sentence])
-
-        d = __direct_recursion_eliminate(d)
-
-    return graph_to_grammar(S, d)
 
 
 def epsilon_productions_eliminate(G):
@@ -76,22 +87,25 @@ def epsilon_productions_eliminate(G):
     nullable = {}
     nullable = __find_nullable_nonterminals(d, nullable, S, nonterminals)
 
-    for _, value in d.items():
-        for sentence in value:
+    for key, value in d.items():
+        new_value = [v for v in value]
 
-            if sentence[0] == "epsilon":
-                value.remove(sentence)
+        for sentence in value:
+            if sentence == []:
+                new_value.remove(sentence)
 
             for i in range(0, len(sentence)):
                 if sentence[i] in nonterminals and nullable[sentence[i]]:
-                    new_sentence = sentence[0:i -
-                                            1] + sentence[1 + 1:len(sentence)]
+                    new_sentence = sentence[0:i] + sentence[i +
+                                                            1:len(sentence)]
 
-                    if not new_sentence in value:
-                        value.append(new_sentence)
+                    if not new_sentence in new_value:
+                        new_value.append(new_sentence)
+
+        d[key] = new_value
 
     if nullable[S]:
-        d[S].append(["epsilon"])
+        d[S].append([])
 
     return graph_to_grammar(S, d)
 
@@ -119,10 +133,3 @@ def __find_nullable_nonterminals(d, nullable, symbol, nonterminals):
         nullable[symbol] = nullable[symbol] or local_nullable
 
     return nullable
-
-
-def cycle_eliminate(G: Grammar):
-    S, d = grammar_to_graph(G)
-    nonterminals = [t.name for t in G.nonterminals]
-
-    return graph_to_grammar(S, d)
