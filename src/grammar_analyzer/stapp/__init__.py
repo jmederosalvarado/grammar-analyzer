@@ -1,6 +1,5 @@
 import streamlit as st
 from grammar_analyzer.interpreter import eval_input
-from grammar_analyzer.stutils import stformat
 
 # pylint: disable=no-value-for-parameter
 
