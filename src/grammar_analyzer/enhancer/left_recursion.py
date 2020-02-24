@@ -1,14 +1,14 @@
 from pycmp.grammar import Grammar, Sentence, Symbol, Production, NonTerminal
 from grammar_analyzer.enhancer.converter import grammar_to_graph, graph_to_grammar
-from grammar_analyzer.enhancer.unnecesary_productions import unitary_eliminate, unreachable_eliminate
+from grammar_analyzer.enhancer.unnecesary_productions import unitary_remove, unreachable_remove
 
 
-def general_recursion_eliminate(G):
+def general_recursion_remove(G):
     nonterminals = [t.name for t in G.nonterminals]
 
-    new_G = epsilon_productions_eliminate(G)
-    # new_G = unitary_eliminate(new_G)
-    # new_G = unreachable_eliminate(new_G)
+    new_G = epsilon_productions_remove(G)
+    # new_G = unitary_remove(new_G)
+    # new_G = unreachable_remove(new_G)
 
     S, d = grammar_to_graph(new_G)
 
@@ -27,12 +27,12 @@ def general_recursion_eliminate(G):
                         for item in remove_first:
                             new_sentence.append(item)
                         d[nonterminals[i]].append(new_sentence)
-        d = __direct_recursion_eliminate(d)
+        d = __direct_recursion_remove(d)
 
     return graph_to_grammar(S, d)
 
 
-def __direct_recursion_eliminate(d: dict):
+def __direct_recursion_remove(d: dict):
     new_productions = []
 
     for key, value in d.items():
@@ -80,7 +80,7 @@ def __direct_recursion_eliminate(d: dict):
     return new_d
 
 
-def epsilon_productions_eliminate(G):
+def epsilon_productions_remove(G):
     S, d = grammar_to_graph(G)
     nonterminals = [t.name for t in G.nonterminals]
 

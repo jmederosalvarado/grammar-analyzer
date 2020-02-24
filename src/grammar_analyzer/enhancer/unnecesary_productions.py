@@ -2,7 +2,7 @@ from pycmp.grammar import Grammar, Sentence, Symbol, Production, NonTerminal
 from grammar_analyzer.enhancer.converter import grammar_to_graph, graph_to_grammar
 
 
-def unreachable_eliminate(G: Grammar):
+def unreachable_remove(G: Grammar):
     S, d = grammar_to_graph(G)
     nonterminals = [t.name for t in G.nonterminals]
 
@@ -27,7 +27,7 @@ def __overlook(d: dict, mark: dict, nonterminals: list, t):
             __overlook(d, mark, nonterminals, sentence[0])
 
 
-def unitary_eliminate(G: Grammar):
+def unitary_remove(G: Grammar):
     S, d = grammar_to_graph(G)
     nonterminals = [t.name for t in G.nonterminals]
     new_d = []

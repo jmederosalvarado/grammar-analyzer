@@ -1,128 +1,126 @@
 from pycmp.grammar import Grammar
-from grammar_analyzer.enhancer.left_recursion import general_recursion_eliminate, __direct_recursion_eliminate, epsilon_productions_eliminate
+from grammar_analyzer.enhancer.left_recursion import general_recursion_remove, __direct_recursion_remove, epsilon_productions_remove
 from grammar_analyzer.enhancer.converter import graph_to_grammar, grammar_to_graph
 
-################################################################################################################
-# epsilon test #1
-grammar = Grammar()
-S = grammar.add_nonterminal("S", True)
-A, B, C = grammar.add_nonterminals("A B C")
-a, b = grammar.add_terminals("a b")
 
-S %= A + B
-S %= C
+def test_epsilon_remove():
+    # epsilon test #1
+    grammar = Grammar()
+    S = grammar.add_nonterminal("S", True)
+    A, B, C = grammar.add_nonterminals("A B C")
+    a, b = grammar.add_terminals("a b")
 
-A %= b + A + b
-A %= grammar.epsilon
+    S %= A + B
+    S %= C
 
-B %= b
+    A %= b + A + b
+    A %= grammar.epsilon
 
-C %= a
-C %= b
+    B %= b
 
-new_grammar = epsilon_productions_eliminate(grammar)
+    C %= a
+    C %= b
 
-_, new_grammar = grammar_to_graph(new_grammar)
+    new_grammar = epsilon_productions_remove(grammar)
 
-_graph = {}
-_graph["S"] = [["A", "B"], ["C"], ["B"]]
-_graph["A"] = [["b", "A", "b"], ["b", "b"]]
-_graph["B"] = [["b"]]
-_graph["C"] = [["a"], ["b"]]
+    _, new_grammar = grammar_to_graph(new_grammar)
 
-assert (new_grammar == _graph)
+    _graph = {}
+    _graph["S"] = [["A", "B"], ["C"], ["B"]]
+    _graph["A"] = [["b", "A", "b"], ["b", "b"]]
+    _graph["B"] = [["b"]]
+    _graph["C"] = [["a"], ["b"]]
 
-##############################################################################################################
-# epsilon test #2
+    assert (new_grammar == _graph)
 
-grammar = Grammar()
-S = grammar.add_nonterminal("S", True)
-A, B, C = grammar.add_nonterminals("A B C")
-a, b = grammar.add_terminals("a b")
+    # epsilon test #2
 
-S %= A + B
-S %= C
+    grammar = Grammar()
+    S = grammar.add_nonterminal("S", True)
+    A, B, C = grammar.add_nonterminals("A B C")
+    a, b = grammar.add_terminals("a b")
 
-A %= b + A + b
-A %= grammar.epsilon
+    S %= A + B
+    S %= C
 
-B %= b
-B %= grammar.epsilon
+    A %= b + A + b
+    A %= grammar.epsilon
 
-C %= a
-C %= b
+    B %= b
+    B %= grammar.epsilon
 
-new_grammar = epsilon_productions_eliminate(grammar)
+    C %= a
+    C %= b
 
-_, new_grammar = grammar_to_graph(new_grammar)
+    new_grammar = epsilon_productions_remove(grammar)
 
-_graph = {}
-_graph["S"] = [["A", "B"], ["C"], ["B"], ["A"], []]
-_graph["A"] = [["b", "A", "b"], ["b", "b"]]
-_graph["B"] = [["b"]]
-_graph["C"] = [["a"], ["b"]]
+    _, new_grammar = grammar_to_graph(new_grammar)
 
-assert (new_grammar == _graph)
+    _graph = {}
+    _graph["S"] = [["A", "B"], ["C"], ["B"], ["A"], []]
+    _graph["A"] = [["b", "A", "b"], ["b", "b"]]
+    _graph["B"] = [["b"]]
+    _graph["C"] = [["a"], ["b"]]
 
-##############################################################################################################
-# direct test #1
+    assert (new_grammar == _graph)
 
-grammar = Grammar()
-S = grammar.add_nonterminal("S", True)
-A, B, C = grammar.add_nonterminals("A B C")
-a, b = grammar.add_terminals("a b")
 
-S %= A + B
-S %= C
+def test_direct_recursion_remove():
+    grammar = Grammar()
+    S = grammar.add_nonterminal("S", True)
+    A, B, C = grammar.add_nonterminals("A B C")
+    a, b = grammar.add_terminals("a b")
 
-A %= A + b
-A %= a
+    S %= A + B
+    S %= C
 
-B %= b
+    A %= A + b
+    A %= a
 
-C %= a
-C %= b
+    B %= b
 
-_, G = grammar_to_graph(grammar)
-new_grammar = __direct_recursion_eliminate(G)
+    C %= a
+    C %= b
 
-_graph = {}
-_graph["S"] = [["A", "B"], ["C"]]
-_graph["A"] = [["a", "A'"]]
-_graph["A'"] = [["b", "A'"], []]
-_graph["B"] = [["b"]]
-_graph["C"] = [["a"], ["b"]]
+    _, G = grammar_to_graph(grammar)
+    new_grammar = __direct_recursion_remove(G)
 
-assert (new_grammar == _graph)
+    _graph = {}
+    _graph["S"] = [["A", "B"], ["C"]]
+    _graph["A"] = [["a", "A'"]]
+    _graph["A'"] = [["b", "A'"], []]
+    _graph["B"] = [["b"]]
+    _graph["C"] = [["a"], ["b"]]
 
-##############################################################################################################
-# general test #1
+    assert (new_grammar == _graph)
 
-grammar = Grammar()
-S = grammar.add_nonterminal("S", True)
-A, B, C = grammar.add_nonterminals("A B C")
-a, b = grammar.add_terminals("a b")
 
-S %= A + b
-S %= C
+def test_general_recursion_remove():
+    grammar = Grammar()
+    S = grammar.add_nonterminal("S", True)
+    A, B, C = grammar.add_nonterminals("A B C")
+    a, b = grammar.add_terminals("a b")
 
-A %= B + a
+    S %= A + b
+    S %= C
 
-B %= S + b
+    A %= B + a
 
-C %= b
+    B %= S + b
 
-new_grammar = general_recursion_eliminate(grammar)
-_, new_grammar = grammar_to_graph(new_grammar)
+    C %= b
 
-_graph = {}
-_graph["S"] = [["A", "b"], ["C"]]
-_graph["A"] = [["B", "a"]]
-_graph["B"] = [["C", "b", "B'"]]
-_graph["B'"] = [["a", "b", "b", "B'"], []]
-_graph["C"] = [["b"]]
+    new_grammar = general_recursion_remove(grammar)
+    _, new_grammar = grammar_to_graph(new_grammar)
 
-print(_graph)
-print(new_grammar)
+    _graph = {}
+    _graph["S"] = [["A", "b"], ["C"]]
+    _graph["A"] = [["B", "a"]]
+    _graph["B"] = [["C", "b", "B'"]]
+    _graph["B'"] = [["a", "b", "b", "B'"], []]
+    _graph["C"] = [["b"]]
 
-assert (new_grammar == _graph)
+    print(_graph)
+    print(new_grammar)
+
+    assert (new_grammar == _graph)

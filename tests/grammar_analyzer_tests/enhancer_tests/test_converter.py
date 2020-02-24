@@ -4,37 +4,38 @@ from pycmp.utils import ContainerSet
 from pycmp.grammar import Grammar, Sentence, Production
 from pycmp.grammar import Item
 
-grammar = Grammar()
-S = grammar.add_nonterminal("S", True)
-A, B, C, X, Y = grammar.add_nonterminals("A B C X Y")
-a, b, d, e = grammar.add_terminals("a b d e")
 
-S %= A + B
-S %= C
+def test_grammar_to_graph():
+    grammar = Grammar()
+    S = grammar.add_nonterminal("S", True)
+    A, B, C, X, Y = grammar.add_nonterminals("A B C X Y")
+    a, b, d, e = grammar.add_terminals("a b d e")
 
-A %= C
-A %= d
+    S %= A + B
+    S %= C
 
-B %= Y
+    A %= C
+    A %= d
 
-C %= a
-C %= b
-C %= X
+    B %= Y
 
-X %= d
-X %= e
+    C %= a
+    C %= b
+    C %= X
 
-Y %= e
+    X %= d
+    X %= e
 
-_S, graph = grammar_to_graph(grammar)
-new_grammar = graph_to_grammar(_S, graph)
+    Y %= e
 
-_graph = {}
-_graph["S"] = [["A", "B"], ["C"]]
-_graph["A"] = [["C"], ["d"]]
-_graph["B"] = [["Y"]]
-_graph["C"] = [["a"], ["b"], ["X"]]
-_graph["X"] = [["d"], ["e"]]
-_graph["Y"] = [["e"]]
+    _S, graph = grammar_to_graph(grammar)
 
-assert (graph == _graph)
+    _graph = {}
+    _graph["S"] = [["A", "B"], ["C"]]
+    _graph["A"] = [["C"], ["d"]]
+    _graph["B"] = [["Y"]]
+    _graph["C"] = [["a"], ["b"], ["X"]]
+    _graph["X"] = [["d"], ["e"]]
+    _graph["Y"] = [["e"]]
+
+    assert (graph == _graph)
