@@ -18,13 +18,13 @@ class __SLR1ParserConflicts(SLR1Parser):
         if key in table and value not in table[key]:
             table[key].append(value)
         else:
-            table[key].append(value)
+            table[key] = [value]
 
 
 @lru_cache
 def __build_slr_info(grammar):
     parser_conflicts = __SLR1ParserConflicts(grammar)
-    automaton = build_lr0_automaton(grammar)
+    automaton = build_lr0_automaton(grammar.get_augmented_grammar(True))
     return shift_reduce_info(
         automaton,
         parser_conflicts.action,
