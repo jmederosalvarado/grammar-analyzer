@@ -1,7 +1,8 @@
 from pycmp.grammar import Grammar, Sentence, Symbol
+from itertools import islice
 
 
-#Α trie structure implementation so we can find common prefixes in the grammar productions
+# Α trie structure implementation so we can find common prefixes in the grammar productions
 class TrieNode:
     def __init__(self, depth=-1, parent=None, symbol=None):
         self.children = {}
@@ -14,15 +15,16 @@ class TrieNode:
 class Trie:
     def __init__(self, symbol):
         self.root = TrieNode()
-        self.prefix_nodes = set(
-        )  #set that contains nodes where ends one largest common prefix of at least two productions
+        self.prefix_nodes = (
+            set()
+        )  # set that contains nodes where ends one largest common prefix of at least two productions
         self.symbol = symbol
         for p in symbol.productions:
             self.add(p)
 
     def add(self, production):
         node = self.root
-        for s in production.Right:
+        for s in production.right:
             try:
                 node = node.children[s]
             except KeyError:
@@ -44,14 +46,17 @@ class Trie:
 
 
 def remove_common_prefixes(G: Grammar):
-    for A in G.nonTerminals.copy():
+    for A in G.nonterminals.copy():
+        count = 1
         trie = Trie(A)
         prefix_nodes = [n for n in trie.prefix_nodes]
         prefix_nodes.sort(key=lambda x: x.depth, reverse=True)
 
-        for n in prefix_nodes:  #get the longest common prefix among the productions be the prefix α
+        for (n) in (
+                prefix_nodes
+        ):  # get the longest common prefix among the productions be the prefix α
             productions = trie.get_node_productions(
-                n)  #get all the productions with that prefix
+                n)  # get all the productions with that prefix
             n.children.clear()
 
             #A -> α ω1 | α ω2 | ... | α ωΝ
@@ -59,17 +64,16 @@ def remove_common_prefixes(G: Grammar):
             #A -> αA'
             #A' -> ω1 | ω2 | ... | ωΝ
 
-            A_new = G.NonTerminal(A.name + "'", False)
-            A %= Sentence(*productions[0].Right._symbols[0, n.depth + 1],
-                          A_new)
+            A_new = G.add_nonterminal(A.name + ("'" * count), False)
+            count += 1
+            A %= Sentence(*islice(productions[0].right, 0, n.depth +
+                                  1)) + A_new
             n.productions = [A.productions[-1]]
 
             for p in productions:
-                if len(p.Right) > n.depth + 1:
-                    A_new %= Sentence(
-                        *p.Right._symbols[n.depth + 1,
-                                          len(productions[0].Right._symbols)])
+                if len(p.right) > n.depth + 1:
+                    A_new %= Sentence(*islice(p.right, n.depth + 1, None))
                 else:
-                    A_new %= G.Epsilon
+                    A_new %= G.epsilon
                 A.productions.remove(p)
-                G.Productions.remove(p)
+                G.productions.remove(p)
