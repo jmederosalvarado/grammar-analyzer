@@ -21,7 +21,7 @@ def test_build_conflict_str():
         (B, b): [Production(B, Sentence(b, B)), Production(B, Sentence(b))],
     }
 
-    conflict_str = build_conflict_str(S, table, G.terminals)
+    conflict_str = build_conflict_str(G)
     parser = build_ll_parser(G, table=table)
 
     try:
