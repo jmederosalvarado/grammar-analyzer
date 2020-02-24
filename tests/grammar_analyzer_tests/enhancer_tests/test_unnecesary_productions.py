@@ -1,28 +1,32 @@
-from grammar_analyzer.enhancer.unnecesary_productions import unreachable_remove, unitary_remove
+from grammar_analyzer.enhancer.unnecesary_productions import (
+    unreachable_remove,
+    unitary_remove,
+)
 from pycmp.parsing import compute_firsts
 from pycmp.utils import ContainerSet
 from pycmp.grammar import Grammar, Sentence, Production
 from pycmp.grammar import Item
 
-def test_unreachable_remove()
-grammar = Grammar()
-S = grammar.add_nonterminal("S", True)
-A, B, C, X, Y = grammar.add_nonterminals("A B C X Y")
-a, b, d, e = grammar.add_terminals("a, b, d, e")
 
-S %= A + B
-S %= C
+def test_unreachable_remove():
+    grammar = Grammar()
+    S = grammar.add_nonterminal("S", True)
+    A, B, C, X, Y = grammar.add_nonterminals("A B C X Y")
+    a, b, d, e = grammar.add_terminals("a, b, d, e")
 
-A %= C
-A %= d
+    S %= A + B
+    S %= C
 
-B %= Y
+    A %= C
+    A %= d
 
-C %= a
-C %= b
-C %= X
+    B %= Y
 
-X %= d
-X %= e
+    C %= a
+    C %= b
+    C %= X
 
-Y %= e
+    X %= d
+    X %= e
+
+    Y %= e
