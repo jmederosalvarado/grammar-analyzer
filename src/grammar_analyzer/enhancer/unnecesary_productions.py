@@ -9,9 +9,9 @@ def unreachable_remove(G: Grammar):
     mark = {}
 
     for p in d.keys():
-        mark[p.left] = False
+        mark[p[0]] = False
 
-    __overlook(d, mark, nonterminals, G.start_symbol)
+    __overlook(d, mark, nonterminals, S)
 
     for t in nonterminals:
         if not mark[t]:
@@ -30,15 +30,15 @@ def __overlook(d: dict, mark: dict, nonterminals: list, t):
 def unitary_remove(G: Grammar):
     S, d = grammar_to_graph(G)
     nonterminals = [t.name for t in G.nonterminals]
-    new_d = []
+    new_d = {}
 
     u = __find_unitary_pairs(d, nonterminals)
-
     for pair in u:
         for sentence in d[pair[1]]:
             if not (len(sentence) == 1 and sentence[0] in nonterminals):
                 try:
-                    new_d[pair[0]].append(sentence)
+                    if (not sentence in new_d[pair[0]]):
+                        new_d[pair[0]].append(sentence)
                 except KeyError:
                     new_d[pair[0]] = [sentence]
 
@@ -47,17 +47,17 @@ def unitary_remove(G: Grammar):
 
 def __find_unitary_pairs(d, nonterminals):
 
-    pairs = [()]
+    pairs = []
     for key, value in d.items():
         for sentence in value:
             if len(sentence) == 1 and sentence[0] in nonterminals:
-                pairs.append(key, sentence[0])
+                pairs.append((key, sentence[0]))
 
     for nt in nonterminals:
+        pairs.append((nt, nt))
         reachable = []
         reachable = __look_forward(pairs, nt, reachable)
 
-        pairs.append(nt, nt)
         for r in reachable:
             if not (nt, r) in pairs:
                 pairs.append((nt, r))
