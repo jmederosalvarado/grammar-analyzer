@@ -1,0 +1,75 @@
+from pycmp.grammar import Grammar, Sentence, Symbol
+
+
+#Α trie structure implementation so we can find common prefixes in the grammar productions
+class TrieNode:
+    def __init__(self, depth=-1, parent=None, symbol=None):
+        self.children = {}
+        self.depth = depth
+        self.parent = parent
+        self.symbol = symbol
+        self.productions = []
+
+
+class Trie:
+    def __init__(self, symbol):
+        self.root = TrieNode()
+        self.prefix_nodes = set(
+        )  #set that contains nodes where ends one largest common prefix of at least two productions
+        self.symbol = symbol
+        for p in symbol.productions:
+            self.add(p)
+
+    def add(self, production):
+        node = self.root
+        for s in production.Right:
+            try:
+                node = node.children[s]
+            except KeyError:
+                node.children[s] = TrieNode(node.depth + 1, node, s)
+                if (len(node.children) == 2
+                        and node.parent) or node.productions:
+                    self.prefix_nodes.add(node)
+                node = node.children[s]
+
+        node.productions.append(production)
+        if len(node.children) >= 1:
+            self.prefix_nodes.add(node)
+
+    def get_node_productions(self, node: TrieNode):
+        productions = [p for p in node.productions]
+        for k in node.children:
+            productions += self.get_node_productions(node.children[k])
+        return productions
+
+
+def remove_common_prefixes(G: Grammar):
+    for A in G.nonTerminals.copy():
+        trie = Trie(A)
+        prefix_nodes = [n for n in trie.prefix_nodes]
+        prefix_nodes.sort(key=lambda x: x.depth, reverse=True)
+
+        for n in prefix_nodes:  #get the longest common prefix among the productions be the prefix α
+            productions = trie.get_node_productions(
+                n)  #get all the productions with that prefix
+            n.children.clear()
+
+            #A -> α ω1 | α ω2 | ... | α ωΝ
+            #replace those productions with
+            #A -> αA'
+            #A' -> ω1 | ω2 | ... | ωΝ
+
+            A_new = G.NonTerminal(A.name + "'", False)
+            A %= Sentence(*productions[0].Right._symbols[0, n.depth + 1],
+                          A_new)
+            n.productions = [A.productions[-1]]
+
+            for p in productions:
+                if len(p.Right) > n.depth + 1:
+                    A_new %= Sentence(
+                        *p.Right._symbols[n.depth + 1,
+                                          len(productions[0].Right._symbols)])
+                else:
+                    A_new %= G.Epsilon
+                A.productions.remove(p)
+                G.Productions.remove(p)
