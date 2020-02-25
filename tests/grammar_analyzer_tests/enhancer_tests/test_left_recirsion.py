@@ -1,9 +1,5 @@
 from pycmp.grammar import Grammar
-from grammar_analyzer.enhancer.left_recursion import (
-    remove_left_recursion,
-    __remove_inmediate_left_recursion,
-    __remove_epsilon_productions,
-)
+from grammar_analyzer.enhancer.left_recursion import remove_left_recursion, __remove_epsilon_productions, __remove_inmediate_left_recursion
 from grammar_analyzer.enhancer.converter import graph_to_grammar, grammar_to_graph
 
 
@@ -35,7 +31,7 @@ def test_epsilon_remove():
     _graph["B"] = [["b"]]
     _graph["C"] = [["a"], ["b"]]
 
-    assert new_grammar == _graph
+    assert (new_grammar == _graph)
 
     # epsilon test #2
 
@@ -66,7 +62,7 @@ def test_epsilon_remove():
     _graph["B"] = [["b"]]
     _graph["C"] = [["a"], ["b"]]
 
-    assert new_grammar == _graph
+    assert (new_grammar == _graph)
 
 
 def test_direct_recursion_remove():
@@ -96,10 +92,10 @@ def test_direct_recursion_remove():
     _graph["B"] = [["b"]]
     _graph["C"] = [["a"], ["b"]]
 
-    assert new_grammar == _graph
+    assert (new_grammar == _graph)
 
 
-def test_remove_left_recursion():
+def test_general_recursion_remove():
     grammar = Grammar()
     S = grammar.add_nonterminal("S", True)
     A, B, C = grammar.add_nonterminals("A B C")
@@ -127,4 +123,4 @@ def test_remove_left_recursion():
     print(_graph)
     print(new_grammar)
 
-    assert new_grammar == _graph
+    assert (new_grammar == _graph)
