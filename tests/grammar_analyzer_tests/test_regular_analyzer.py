@@ -43,6 +43,8 @@ def test_gramar_to_automaton():
     B %= b
 
     aut = grammar_to_automaton(G)
+    # aut.graph().write("/home/rodrigo/Projects/grammar_analizer/graph",
+    #                   format="svg")
 
 
 def test_automaton_to_regex():
@@ -57,8 +59,8 @@ def test_automaton_to_regex():
 
     aut = grammar_to_automaton(G)
 
-    aut.graph().write("/home/rodrigo/Projects/grammar_analizer/graph",
-                      format="svg")
+    # aut.graph().write("/home/rodrigo/Projects/grammar_analizer/graph",
+    #                   format="svg")
 
     regex = automaton_to_regex(aut)
 

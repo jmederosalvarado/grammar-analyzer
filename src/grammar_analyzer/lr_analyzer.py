@@ -18,13 +18,13 @@ class __LR1ParserConflicts(LR1Parser):
         if key in table and value not in table[key]:
             table[key].append(value)
         else:
-            table[key].append(value)
+            table[key] = [value]
 
 
 @lru_cache
 def __build_lr_info(grammar):
     parser_conflicts = __LR1ParserConflicts(grammar)
-    automaton = build_lr1_automaton(grammar)
+    automaton = build_lr1_automaton(grammar.get_augmented_grammar(True))
     return shift_reduce_info(
         automaton,
         parser_conflicts.action,
@@ -66,7 +66,6 @@ def build_automaton(grammar):
 def get_derivation_tree_builder(grammar):
     parser = __build_lr_parser(grammar)
 
-    @lru_cache
     def tree_builder(tokens):
         parse = parser(tokens)
         right_parse = reversed(parse)

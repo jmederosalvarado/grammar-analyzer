@@ -1,4 +1,4 @@
-from grammar_analyzer.enhancer.remove_common_prefix import remove_common_prefixes
+from grammar_analyzer.enhancer.remove_common_prefixes import remove_common_prefixes
 
 from grammar_analyzer.enhancer.converter import graph_to_grammar, grammar_to_graph
 from pycmp.parsing import compute_firsts
@@ -7,7 +7,7 @@ from pycmp.grammar import Grammar, Sentence, Production
 from pycmp.grammar import Item
 
 
-def test_unreachable_remove():
+def test_remove_unreachable_prods():
     grammar = Grammar()
     S = grammar.add_nonterminal("S", True)
     A, B, C = grammar.add_nonterminals("A B C")
@@ -27,4 +27,4 @@ def test_unreachable_remove():
     print(grammar)
     print(_graph)
 
-    assert (grammar == _graph)
+    assert grammar == _graph

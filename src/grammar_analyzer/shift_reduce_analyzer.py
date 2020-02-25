@@ -1,4 +1,5 @@
 from functools import namedtuple
+from pycmp.utils import pprint
 
 shift_reduce_info = namedtuple(
     "parser_info",
@@ -15,6 +16,7 @@ def build_conflict_str(action, goto, terminals, shift_act, reduce_act):
 def __build_conflict_str(
     stack, visited, action_table, goto_table, terminals, shift_act, reduce_act
 ):
+    # print(stack)
     state = stack[-1]
 
     for t in terminals:
@@ -23,6 +25,7 @@ def __build_conflict_str(
 
         try:
             value = action_table[state, t]
+            # print(f"({state}, {t}) --> {value}")
         except KeyError:
             continue
 
@@ -47,7 +50,6 @@ def __build_conflict_str(
             return [t] + conflict
 
         if action == reduce_act:
-            visited.add((state, t))
             temp_stack = stack[: -len(tag.right)]
             return __build_conflict_str(
                 temp_stack + [goto_table[temp_stack[-1], tag.left][0]],

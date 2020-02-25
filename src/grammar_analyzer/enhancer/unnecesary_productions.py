@@ -3,12 +3,12 @@ from grammar_analyzer.enhancer.converter import grammar_to_graph, graph_to_gramm
 
 
 def remove_unnecesary_productions(G: Grammar):
-    new_G = unitary_remove(G)
-    new_G = unreachable_remove(new_G)
+    new_G = remove_unit_prods(G)
+    new_G = remove_unreachable_prods(new_G)
     return new_G
 
 
-def unreachable_remove(G: Grammar):
+def remove_unreachable_prods(G: Grammar):
     S, d = grammar_to_graph(G)
     nonterminals = [t.name for t in G.nonterminals]
 
@@ -36,7 +36,7 @@ def __overlook(d: dict, mark: dict, nonterminals: list, t):
                 __overlook(d, mark, nonterminals, symbol)
 
 
-def unitary_remove(G: Grammar):
+def remove_unit_prods(G: Grammar):
     S, d = grammar_to_graph(G)
     nonterminals = [t.name for t in G.nonterminals]
     new_d = {}
@@ -46,13 +46,12 @@ def unitary_remove(G: Grammar):
         for sentence in d[pair[1]]:
             if not (len(sentence) == 1 and sentence[0] in nonterminals):
                 try:
-                    if (not sentence in new_d[pair[0]]):
+                    if not sentence in new_d[pair[0]]:
                         new_d[pair[0]].append(sentence)
                 except KeyError:
                     new_d[pair[0]] = [sentence]
 
-    new_G = graph_to_grammar(S, new_d)
-    return unreachable_remove(new_G)
+    return graph_to_grammar(S, new_d)
 
 
 def __find_unitary_pairs(d, nonterminals):

@@ -24,11 +24,11 @@ def run_slr_analysis(grammar):
 
     if not is_slr:
         conflict = build_conflict_str(grammar)
-        conflict = [str(t) for t in conflict]
+        conflict = " ".join(str(t) for t in conflict)
         st.write(
             "A possible string that leads to a conflict when trying to parse it is:"
         )
-        st.write(conflict)
+        st.write(f"> __{conflict.strip()}__ ...")
 
     # automaton = build_automaton(grammar)
     # st.write("__LR0 Automaton:__")

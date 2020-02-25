@@ -1,6 +1,6 @@
+import json
 from itertools import chain
 from pycmp.grammar import Grammar, NonTerminal, Production, Sentence
-import json
 
 
 def grammar_to_graph(grammar: Grammar):
@@ -16,20 +16,17 @@ def grammar_to_graph(grammar: Grammar):
 def graph_to_grammar(start_symbol: str, productions: dict):
     grammar = Grammar()
     for nt in productions.keys():
-        grammar.add_nonterminal(nt, start_symbol=(nt == start_symbol))
+        is_start_symbol = nt == start_symbol
+        grammar.add_nonterminal(nt, start_symbol=is_start_symbol)
 
-    for _, value in productions.items():  # TODO: Refactor
-        for string in value:
-            for t in string:
-                if grammar[t] is None:
-                    grammar.add_terminal(t)
+    bodies = chain(*tuple(productions.values()))
+    symbols = chain(*tuple(bodies))
+    teminals = (s for s in symbols if grammar[s] is None)
+    for t in teminals:
+        grammar.add_terminal(t)
 
     for head, bodies in productions.items():
         for body in bodies:
-            if body == "":
-                body = [grammar.epsilon]
-            else:
-                body = [grammar[s] for s in body]
-
+            body = [grammar.epsilon] if body == "" else [grammar[s] for s in body]
             grammar.add_production(Production(grammar[head], Sentence(*body)))
     return grammar
