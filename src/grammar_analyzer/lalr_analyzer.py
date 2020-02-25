@@ -46,24 +46,29 @@ class LALRParser(ShiftReduceParser):
 
                 x = item.next_symbol
                 try:
-                    # TODO: Fix this
-                    # dest = node.transitions[x.name][0]
-                    dest = next(iter(automaton))
+                    original_node = next(
+                        node
+                        for node in automaton
+                        if self._get_core(node.state) == self._get_core(state)
+                    )
+                    original_dest = original_node.transitions[x.name][0]
+                    dest_idx = next(
+                        i
+                        for i, s in enumerate(merged_states)
+                        if self._get_core(s) == self._get_core(original_dest)
+                    )
                 except KeyError:
                     continue
                 if x.is_terminal:
-                    self._register(self.action, (idx, x), (self.SHIFT, dest.idx))
+                    self._register(self.action, (idx, x), (self.SHIFT, dest_idx))
                 else:
-                    self._register(self.goto, (idx, x), dest.idx)
+                    self._register(self.goto, (idx, x), dest_idx)
 
-    @staticmethod
-    def _merge_states(states):
-        def get_core(state):
-            return frozenset(i.center() for i in state)
-
-        cores, new_states = frozenset(get_core(s) for s in states), []
+    @classmethod
+    def _merge_states(cls, states):
+        cores, new_states = frozenset(cls._get_core(s) for s in states), []
         for core in cores:
-            items = chain(state for state in states if get_core(state) == core)
+            items = chain(state for state in states if cls._get_core(state) == core)
             new_state = frozenset(
                 Item(
                     center.production,
@@ -77,6 +82,10 @@ class LALRParser(ShiftReduceParser):
             new_states.append(new_state)
 
         return new_states
+
+    @staticmethod
+    def _get_core(state):
+        return frozenset(i.center() for i in state)
 
     @staticmethod
     def _register(table, key, value):
