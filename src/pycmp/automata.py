@@ -227,7 +227,7 @@ class NFA:
         self.vocabulary.discard("")
 
     def epsilon_transitions(self, state):
-        assert state in self.transitions, "Invalid state"
+        assert state in self.transitions, "Invalid state" + str(state)
         try:
             return self.transitions[state][""]
         except KeyError:
