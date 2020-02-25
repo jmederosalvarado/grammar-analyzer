@@ -22,9 +22,9 @@ def remove_left_recursion(grammar):
                     d[nonterminals[i]].remove(sentence)
                     remove_first = sentence[1 : len(sentence)]
 
-                    for _sentence in d[nonterminals[j]]:
+                    for sentence in d[nonterminals[j]]:
                         new_sentence = []
-                        for item in _sentence:
+                        for item in sentence:
                             new_sentence.append(item)
                         for item in remove_first:
                             new_sentence.append(item)
