@@ -21,10 +21,13 @@ def unreachable_remove(G: Grammar):
 
 
 def __overlook(d: dict, mark: dict, nonterminals: list, t):
+    if mark[t]:
+        return
     mark[t] = True
     for sentence in d[t]:
-        if len(sentence) == 1 and sentence[0] in nonterminals:
-            __overlook(d, mark, nonterminals, sentence[0])
+        for symbol in sentence:
+            if symbol in nonterminals:
+                __overlook(d, mark, nonterminals, symbol)
 
 
 def unitary_remove(G: Grammar):
@@ -42,7 +45,8 @@ def unitary_remove(G: Grammar):
                 except KeyError:
                     new_d[pair[0]] = [sentence]
 
-    return graph_to_grammar(S, new_d)
+    result = graph_to_grammar(S, new_d)
+    return unreachable_remove(result)
 
 
 def __find_unitary_pairs(d, nonterminals):

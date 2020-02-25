@@ -38,7 +38,7 @@ def grammar_to_automaton(grammar):
 
 
 def automaton_to_regex(automaton):
-    # automaton = nfa_to_dfa(automaton)
+    automaton = nfa_to_dfa(automaton)
 
     states, transitions = __automaton_to_gnfa(automaton)
     return __gnfa_to_regex(list(range(states)), transitions)
