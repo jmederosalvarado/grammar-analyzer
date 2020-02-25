@@ -114,11 +114,10 @@ def test_general_recursion_remove():
     _, new_grammar = grammar_to_graph(new_grammar)
 
     _graph = {}
-    _graph["S"] = [["A", "b"], ["C"]]
+    _graph["S"] = [["b"], ["A", "b"]]
     _graph["A"] = [["B", "a"]]
-    _graph["B"] = [["C", "b", "B'"]]
+    _graph["B"] = [["b", "b", "B'"]]
     _graph["B'"] = [["a", "b", "b", "B'"], []]
-    _graph["C"] = [["b"]]
 
     print(_graph)
     print(new_grammar)

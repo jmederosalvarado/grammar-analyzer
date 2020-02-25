@@ -4,13 +4,15 @@ from grammar_analyzer.enhancer.unnecesary_productions import unitary_remove, unr
 
 
 def general_recursion_remove(G):
-    nonterminals = [t.name for t in G.nonterminals]
-
     new_G = epsilon_productions_remove(G)
-    # new_G = unitary_remove(new_G)
-    # new_G = unreachable_remove(new_G)
+    new_G = unitary_remove(new_G)
+    new_G = unreachable_remove(new_G)
+
+    nonterminals = [t.name for t in new_G.nonterminals]
 
     S, d = grammar_to_graph(new_G)
+
+    print(d)
 
     for i in range(0, len(nonterminals)):
         for j in range(0, i):
