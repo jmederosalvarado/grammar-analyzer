@@ -15,8 +15,10 @@ def input_grammar():
         label="Please input your grammar here",
         value="s -> if x then s\ns -> if x then s else s\ns -> num\nx -> num",
     )
-    grammar = eval_input(input_text)
-    return grammar
+    try:
+        return eval_input(input_text)
+    except:
+        return None
 
 
 def build_options():
