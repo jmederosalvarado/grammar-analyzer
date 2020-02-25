@@ -45,25 +45,30 @@ class LALRParser(ShiftReduceParser):
                     continue
 
                 x = item.next_symbol
+                original_node = next(
+                    node
+                    for node in automaton
+                    if self._get_core(node.state) == self._get_core(state)
+                )
                 try:
-                    # TODO: Fix this
-                    # dest = node.transitions[x.name][0]
-                    dest = next(iter(automaton))
+                    original_dest = original_node.transitions[x.name][0].state
                 except KeyError:
                     continue
+                dest_idx = next(
+                    i
+                    for i, s in enumerate(merged_states)
+                    if self._get_core(s) == self._get_core(original_dest)
+                )
                 if x.is_terminal:
-                    self._register(self.action, (idx, x), (self.SHIFT, dest.idx))
+                    self._register(self.action, (idx, x), (self.SHIFT, dest_idx))
                 else:
-                    self._register(self.goto, (idx, x), dest.idx)
+                    self._register(self.goto, (idx, x), dest_idx)
 
-    @staticmethod
-    def _merge_states(states):
-        def get_core(state):
-            return frozenset(i.center() for i in state)
-
-        cores, new_states = frozenset(get_core(s) for s in states), []
+    @classmethod
+    def _merge_states(cls, states):
+        cores, new_states = frozenset(cls._get_core(s) for s in states), []
         for core in cores:
-            items = chain(state for state in states if get_core(state) == core)
+            items = chain(state for state in states if cls._get_core(state) == core)
             new_state = frozenset(
                 Item(
                     center.production,
@@ -77,6 +82,10 @@ class LALRParser(ShiftReduceParser):
             new_states.append(new_state)
 
         return new_states
+
+    @staticmethod
+    def _get_core(state):
+        return frozenset(i.center() for i in state)
 
     @staticmethod
     def _register(table, key, value):
@@ -95,13 +104,13 @@ class __LALRParserConflicts(LALRParser):
         if key in table and value not in table[key]:
             table[key].append(value)
         else:
-            table[key].append(value)
+            table[key] = [value]
 
 
 @lru_cache
 def __build_lalr_info(grammar):
     parser_conflicts = __LALRParserConflicts(grammar)
-    automaton = build_lr1_automaton(grammar)
+    automaton = build_lr1_automaton(grammar.get_augmented_grammar(True))
     return shift_reduce_info(
         automaton,
         parser_conflicts.action,

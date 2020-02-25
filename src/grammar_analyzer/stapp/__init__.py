@@ -3,6 +3,7 @@ from grammar_analyzer.interpreter import eval_input
 from grammar_analyzer.stapp.basic_analysis import run_basic_analysis
 from grammar_analyzer.stapp.ll_analysis import run_ll_analysis
 from grammar_analyzer.stapp.slr_analysis import run_slr_analysis
+from grammar_analyzer.stapp.lalr_analysis import run_lalr_analysis
 from grammar_analyzer.stapp.lr_analysis import run_lr_analysis
 from grammar_analyzer.stapp.regular_analysis import run_regular_analysis
 from grammar_analyzer.stapp.enhancement_analysis import run_enhancement_analysis
@@ -27,6 +28,7 @@ def build_options():
         "LL": run_ll_analysis,
         "SLR": run_slr_analysis,
         "LR": run_lr_analysis,
+        "LALR (NOT WORKING)": run_lalr_analysis,
         "Regular": run_regular_analysis,
         "Enhancement": run_enhancement_analysis,
     }

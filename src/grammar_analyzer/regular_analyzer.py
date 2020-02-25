@@ -15,8 +15,7 @@ def is_regular_grammar(grammar):
 
 
 def grammar_to_automaton(grammar):
-    nonterminals = (nt for nt in grammar.nonterminals
-                    if nt != grammar.start_symbol)
+    nonterminals = (nt for nt in grammar.nonterminals if nt != grammar.start_symbol)
     state_map = {nt: i + 1 for i, nt in enumerate(nonterminals)}
     state_map[grammar.start_symbol] = 0
 
@@ -42,8 +41,6 @@ def automaton_to_regex(automaton):
     automaton = nfa_to_dfa(automaton)
 
     states, transitions = __automaton_to_gnfa(automaton)
-    pprint(transitions)
-    print(" ")
     return __gnfa_to_regex(list(range(states)), transitions)
 
 
@@ -67,8 +64,10 @@ def __gnfa_to_regex(states, transitions):
 
 
 def __automaton_to_gnfa(automaton):
-    start, old_start = 0, 1
+    nosymbol = "@"
+
     states = automaton.states + 2
+    start, old_start = 0, 1
     final = states - 1
 
     transitions = {}
@@ -81,19 +80,19 @@ def __automaton_to_gnfa(automaton):
                 if dests is not None and dest in dests:
                     trans_syms.append(symbol)
 
-            trans_regex = "z" if not trans_syms else "|".join(trans_syms)
+            trans_regex = nosymbol if not trans_syms else "|".join(trans_syms)
             transitions[old_start + origin, old_start + dest] = trans_regex
 
     ## Add transitions from start state ...
 
     for state in range(automaton.states):
-        transitions[start, old_start + state] = "z"
+        transitions[start, old_start + state] = nosymbol
     transitions[start, old_start] = "ε"
-    transitions[start, final] = "z"
+    transitions[start, final] = nosymbol
 
     ## Add transitions to final state ...
     for state in range(automaton.states):
-        symbol = "ε" if state in automaton.finals else "z"
+        symbol = "ε" if state in automaton.finals else nosymbol
         transitions[old_start + state, final] = symbol
 
     return states, transitions

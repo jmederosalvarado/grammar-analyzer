@@ -10,14 +10,8 @@ def run_basic_analysis(grammar):
     st.write("")
 
     firsts = compute_firsts(grammar)
-    st.write("__Firsts:__", {str(k): fix_container_set(v) for k, v in firsts.items()})
+    st.write("__Firsts:__", {str(k): str(v) for k, v in firsts.items()})
 
     follows = compute_firsts(grammar)
-    st.write("__Follows:__", {str(k): fix_container_set(v) for k, v in follows.items()})
-
-
-def fix_container_set(container_set: ContainerSet):
-    return [str(s) for s in container_set.set] + (
-        ["epsilon"] if container_set.contains_epsilon else []
-    )
+    st.write("__Follows:__", {str(k): str(v) for k, v in follows.items()})
 
