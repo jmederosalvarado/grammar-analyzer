@@ -45,20 +45,20 @@ class LALRParser(ShiftReduceParser):
                     continue
 
                 x = item.next_symbol
+                original_node = next(
+                    node
+                    for node in automaton
+                    if self._get_core(node.state) == self._get_core(state)
+                )
                 try:
-                    original_node = next(
-                        node
-                        for node in automaton
-                        if self._get_core(node.state) == self._get_core(state)
-                    )
-                    original_dest = original_node.transitions[x.name][0]
-                    dest_idx = next(
-                        i
-                        for i, s in enumerate(merged_states)
-                        if self._get_core(s) == self._get_core(original_dest)
-                    )
+                    original_dest = original_node.transitions[x.name][0].state
                 except KeyError:
                     continue
+                dest_idx = next(
+                    i
+                    for i, s in enumerate(merged_states)
+                    if self._get_core(s) == self._get_core(original_dest)
+                )
                 if x.is_terminal:
                     self._register(self.action, (idx, x), (self.SHIFT, dest_idx))
                 else:
@@ -104,13 +104,13 @@ class __LALRParserConflicts(LALRParser):
         if key in table and value not in table[key]:
             table[key].append(value)
         else:
-            table[key].append(value)
+            table[key] = [value]
 
 
 @lru_cache
 def __build_lalr_info(grammar):
     parser_conflicts = __LALRParserConflicts(grammar)
-    automaton = build_lr1_automaton(grammar)
+    automaton = build_lr1_automaton(grammar.get_augmented_grammar(True))
     return shift_reduce_info(
         automaton,
         parser_conflicts.action,

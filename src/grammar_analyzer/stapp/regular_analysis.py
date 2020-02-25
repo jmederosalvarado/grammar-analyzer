@@ -22,4 +22,6 @@ def run_regular_analysis(grammar):
     st.graphviz_chart(str(automaton.graph()))
 
     regex = automaton_to_regex(automaton)
-    st.write(f"_A regular expression to represent your grammar could be {regex}_")
+    st.write(f"_A regular expression to represent your grammar could be:_")
+    st.write(f"> {regex}")
+    st.write("where '@' doesn't match any symbol in your vocabulary")
