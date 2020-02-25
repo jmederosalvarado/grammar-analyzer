@@ -31,9 +31,10 @@ class EpsNode(SymbolNode):
 
 def build_input_lexer(eps, union, arrow, eol, symbol, eof):
     digits = "|".join(str(n) for n in range(10))
-    letters = "|".join(chr(n) for n in range(ord("a"), ord("z") + 1))
+    lowercase = "|".join(chr(n) for n in range(ord("a"), ord("z") + 1))
+    uppercase = "|".join(chr(n) for n in range(ord("A"), ord("Z") + 1))
     others = "|".join([r"\(", r"\)"])
-    symbols = f"{letters}|{digits}|{others}"
+    symbols = f"{lowercase}|{uppercase}|{digits}|{others}"
     ignore = "__ignore__"
 
     lexer = Lexer(
@@ -41,9 +42,9 @@ def build_input_lexer(eps, union, arrow, eol, symbol, eof):
             (eps, "eps"),
             (union, r"\|"),
             (arrow, "->"),
-            (eol, "\\n"),
+            (eol, "\n"),
             (ignore, "  *"),
-            (symbol, f"({symbols})({symbols})*"),
+            (symbol, f"({symbols})(({symbols})*)"),
         ],
         eof,
     )
@@ -71,7 +72,7 @@ def build_input_grammar():
     symbol, arrow, union, eps, eol = input_grammar.add_terminals("symbol -> | eps eol")
 
     grammar %= prod_list, lambda h, s: GNode(s[1])
-    prod_list %= prod + eol + prod_list, lambda h, s: s[1] + s[2]
+    prod_list %= prod + eol + prod_list, lambda h, s: s[1] + s[3]
     prod_list %= prod, lambda h, s: s[1]
     prod %= (
         symbol + arrow + sent_list,

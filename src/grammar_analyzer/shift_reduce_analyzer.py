@@ -8,7 +8,7 @@ shift_reduce_info = namedtuple(
 
 def build_conflict_str(action, goto, terminals, shift_act, reduce_act):
     return __build_conflict_str(
-        [0], set(), action, goto, terminals, reduce_act, reduce_act
+        [0], set(), action, goto, terminals, shift_act, reduce_act
     )
 
 
@@ -22,7 +22,7 @@ def __build_conflict_str(
             continue
 
         try:
-            value = action[state, t]
+            value = action_table[state, t]
         except KeyError:
             continue
 
@@ -43,14 +43,14 @@ def __build_conflict_str(
                 reduce_act,
             )
             if conflict is None:
-                return None
+                continue
             return [t] + conflict
 
         if action == reduce_act:
             visited.add((state, t))
             temp_stack = stack[: -len(tag.right)]
-            conflict = __build_conflict_str(
-                temp_stack + [goto_table[temp_stack[-1], tag.left]],
+            return __build_conflict_str(
+                temp_stack + [goto_table[temp_stack[-1], tag.left][0]],
                 visited,
                 action_table,
                 goto_table,
@@ -58,6 +58,5 @@ def __build_conflict_str(
                 shift_act,
                 reduce_act,
             )
-            return conflict
 
     return None
