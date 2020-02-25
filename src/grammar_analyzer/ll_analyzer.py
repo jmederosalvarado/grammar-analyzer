@@ -63,9 +63,8 @@ def get_derivation_tree_builder(grammar):
     table = build_ll_table(grammar)
     parser = build_ll_parser(grammar, table=table)
 
-    @lru_cache
     def tree_builder(tokens):
-        left_parse = parser(tokens)
+        left_parse = parser([grammar[t] for t in tokens] + [grammar.eof])
         return build_derivation_tree(left_parse)
 
     return tree_builder

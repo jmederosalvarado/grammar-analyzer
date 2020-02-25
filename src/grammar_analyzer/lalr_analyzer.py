@@ -143,7 +143,6 @@ def build_automaton(grammar):
 def get_derivation_tree_builder(grammar):
     parser = __build_lalr_parser(grammar)
 
-    @lru_cache
     def tree_builder(tokens):
         parse = parser(tokens)
         right_parse = reversed(parse)
