@@ -1,5 +1,9 @@
 from pycmp.grammar import Grammar
-from grammar_analyzer.enhancer.left_recursion import general_recursion_remove, __direct_recursion_remove, epsilon_productions_remove
+from grammar_analyzer.enhancer.left_recursion import (
+    remove_left_recursion,
+    __remove_inmediate_left_recursion,
+    __remove_epsilon_productions,
+)
 from grammar_analyzer.enhancer.converter import graph_to_grammar, grammar_to_graph
 
 
@@ -21,7 +25,7 @@ def test_epsilon_remove():
     C %= a
     C %= b
 
-    new_grammar = epsilon_productions_remove(grammar)
+    new_grammar = __remove_epsilon_productions(grammar)
 
     _, new_grammar = grammar_to_graph(new_grammar)
 
@@ -31,7 +35,7 @@ def test_epsilon_remove():
     _graph["B"] = [["b"]]
     _graph["C"] = [["a"], ["b"]]
 
-    assert (new_grammar == _graph)
+    assert new_grammar == _graph
 
     # epsilon test #2
 
@@ -52,7 +56,7 @@ def test_epsilon_remove():
     C %= a
     C %= b
 
-    new_grammar = epsilon_productions_remove(grammar)
+    new_grammar = __remove_epsilon_productions(grammar)
 
     _, new_grammar = grammar_to_graph(new_grammar)
 
@@ -62,7 +66,7 @@ def test_epsilon_remove():
     _graph["B"] = [["b"]]
     _graph["C"] = [["a"], ["b"]]
 
-    assert (new_grammar == _graph)
+    assert new_grammar == _graph
 
 
 def test_direct_recursion_remove():
@@ -83,7 +87,7 @@ def test_direct_recursion_remove():
     C %= b
 
     _, G = grammar_to_graph(grammar)
-    new_grammar = __direct_recursion_remove(G)
+    new_grammar = __remove_inmediate_left_recursion(G)
 
     _graph = {}
     _graph["S"] = [["A", "B"], ["C"]]
@@ -92,10 +96,10 @@ def test_direct_recursion_remove():
     _graph["B"] = [["b"]]
     _graph["C"] = [["a"], ["b"]]
 
-    assert (new_grammar == _graph)
+    assert new_grammar == _graph
 
 
-def test_general_recursion_remove():
+def test_remove_left_recursion():
     grammar = Grammar()
     S = grammar.add_nonterminal("S", True)
     A, B, C = grammar.add_nonterminals("A B C")
@@ -110,7 +114,7 @@ def test_general_recursion_remove():
 
     C %= b
 
-    new_grammar = general_recursion_remove(grammar)
+    new_grammar = remove_left_recursion(grammar)
     _, new_grammar = grammar_to_graph(new_grammar)
 
     _graph = {}
@@ -122,4 +126,5 @@ def test_general_recursion_remove():
     print(_graph)
     print(new_grammar)
 
-    assert (new_grammar == _graph)
+    assert new_grammar == _graph
+

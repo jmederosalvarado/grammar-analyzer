@@ -1,26 +1,26 @@
 from pycmp.grammar import Grammar, Sentence, Symbol, Production, NonTerminal
 from grammar_analyzer.enhancer.converter import grammar_to_graph, graph_to_grammar
-from grammar_analyzer.enhancer.unnecesary_productions import unitary_remove, unreachable_remove
+from grammar_analyzer.enhancer.unnecesary_productions import (
+    unitary_remove,
+    unreachable_remove,
+)
 
 
-def general_recursion_remove(G):
-    new_G = epsilon_productions_remove(G)
-    new_G = unitary_remove(new_G)
-    new_G = unreachable_remove(new_G)
+def remove_left_recursion(grammar):
+    new_grammar = __remove_epsilon_productions(grammar)
+    new_grammar = unitary_remove(new_grammar)
+    new_grammar = unreachable_remove(new_grammar)
 
-    nonterminals = [t.name for t in new_G.nonterminals]
+    nonterminals = [t.name for t in new_grammar.nonterminals]
 
-    S, d = grammar_to_graph(new_G)
-
-    print(d)
+    S, d = grammar_to_graph(new_grammar)
 
     for i in range(0, len(nonterminals)):
         for j in range(0, i):
-
             for sentence in d[nonterminals[i]]:
                 if sentence[0] == nonterminals[j]:
                     d[nonterminals[i]].remove(sentence)
-                    remove_first = sentence[1:len(sentence)]
+                    remove_first = sentence[1 : len(sentence)]
 
                     for _sentence in d[nonterminals[j]]:
                         new_sentence = []
@@ -29,12 +29,12 @@ def general_recursion_remove(G):
                         for item in remove_first:
                             new_sentence.append(item)
                         d[nonterminals[i]].append(new_sentence)
-        d = __direct_recursion_remove(d)
+        d = __remove_inmediate_left_recursion(d)
 
     return graph_to_grammar(S, d)
 
 
-def __direct_recursion_remove(d: dict):
+def __remove_inmediate_left_recursion(d: dict):
     new_productions = []
 
     for key, value in d.items():
@@ -54,7 +54,7 @@ def __direct_recursion_remove(d: dict):
 
         # there's some left recursion
         else:
-            X = (key + "'")
+            X = key + "'"
 
             for sentence in no_recursion:
                 sentence.append(X)
@@ -82,9 +82,9 @@ def __direct_recursion_remove(d: dict):
     return new_d
 
 
-def epsilon_productions_remove(G):
-    S, d = grammar_to_graph(G)
-    nonterminals = [t.name for t in G.nonterminals]
+def __remove_epsilon_productions(grammar):
+    S, d = grammar_to_graph(grammar)
+    nonterminals = [t.name for t in grammar.nonterminals]
 
     nullable = {}
     nullable = __find_nullable_nonterminals(d, nullable, S, nonterminals)
@@ -98,8 +98,7 @@ def epsilon_productions_remove(G):
 
             for i in range(0, len(sentence)):
                 if sentence[i] in nonterminals and nullable[sentence[i]]:
-                    new_sentence = sentence[0:i] + sentence[i +
-                                                            1:len(sentence)]
+                    new_sentence = sentence[0:i] + sentence[i + 1 : len(sentence)]
 
                     if not new_sentence in new_value:
                         new_value.append(new_sentence)
@@ -128,8 +127,7 @@ def __find_nullable_nonterminals(d, nullable, symbol, nonterminals):
             elif not symb in nonterminals:
                 local_nullable = False
             else:
-                nullable = __find_nullable_nonterminals(
-                    d, nullable, symb, nonterminals)
+                nullable = __find_nullable_nonterminals(d, nullable, symb, nonterminals)
                 local_nullable = local_nullable and nullable[symb]
 
         nullable[symbol] = nullable[symbol] or local_nullable
