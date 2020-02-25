@@ -1,15 +1,15 @@
 from pycmp.grammar import Grammar, Sentence, Symbol, Production, NonTerminal
 from grammar_analyzer.enhancer.converter import grammar_to_graph, graph_to_grammar
 from grammar_analyzer.enhancer.unnecesary_productions import (
-    unitary_remove,
-    unreachable_remove,
+    remove_unit_prods,
+    remove_unreachable_prods,
 )
 
 
 def remove_left_recursion(grammar):
     new_grammar = __remove_epsilon_productions(grammar)
-    new_grammar = unitary_remove(new_grammar)
-    new_grammar = unreachable_remove(new_grammar)
+    new_grammar = remove_unit_prods(new_grammar)
+    new_grammar = remove_unreachable_prods(new_grammar)
 
     nonterminals = [t.name for t in new_grammar.nonterminals]
 

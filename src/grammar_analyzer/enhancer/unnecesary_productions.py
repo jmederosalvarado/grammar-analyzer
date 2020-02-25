@@ -2,7 +2,7 @@ from pycmp.grammar import Grammar, Sentence, Symbol, Production, NonTerminal
 from grammar_analyzer.enhancer.converter import grammar_to_graph, graph_to_grammar
 
 
-def unreachable_remove(G: Grammar):
+def remove_unreachable_prods(G: Grammar):
     S, d = grammar_to_graph(G)
     nonterminals = [t.name for t in G.nonterminals]
 
@@ -30,7 +30,7 @@ def __overlook(d: dict, mark: dict, nonterminals: list, t):
                 __overlook(d, mark, nonterminals, symbol)
 
 
-def unitary_remove(G: Grammar):
+def remove_unit_prods(G: Grammar):
     S, d = grammar_to_graph(G)
     nonterminals = [t.name for t in G.nonterminals]
     new_d = {}
@@ -40,13 +40,13 @@ def unitary_remove(G: Grammar):
         for sentence in d[pair[1]]:
             if not (len(sentence) == 1 and sentence[0] in nonterminals):
                 try:
-                    if (not sentence in new_d[pair[0]]):
+                    if not sentence in new_d[pair[0]]:
                         new_d[pair[0]].append(sentence)
                 except KeyError:
                     new_d[pair[0]] = [sentence]
 
     result = graph_to_grammar(S, new_d)
-    return unreachable_remove(result)
+    return remove_unreachable_prods(result)
 
 
 def __find_unitary_pairs(d, nonterminals):

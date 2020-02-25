@@ -1,6 +1,6 @@
 from grammar_analyzer.enhancer.unnecesary_productions import (
-    unreachable_remove,
-    unitary_remove,
+    remove_unreachable_prods,
+    remove_unit_prods,
 )
 from grammar_analyzer.enhancer.converter import graph_to_grammar, grammar_to_graph
 from pycmp.parsing import compute_firsts
@@ -9,7 +9,7 @@ from pycmp.grammar import Grammar, Sentence, Production
 from pycmp.grammar import Item
 
 
-def test_unreachable_remove():
+def test_remove_unreachable_prods():
     grammar = Grammar()
     S = grammar.add_nonterminal("S", True)
     A, B, C = grammar.add_nonterminals("A B C")
@@ -24,7 +24,7 @@ def test_unreachable_remove():
 
     C %= a
 
-    new_grammar = unreachable_remove(grammar)
+    new_grammar = remove_unreachable_prods(grammar)
 
     _, new_grammar = grammar_to_graph(new_grammar)
 
@@ -33,7 +33,7 @@ def test_unreachable_remove():
     _graph["A"] = [["B"]]
     _graph["B"] = [["a"]]
 
-    assert (new_grammar == _graph)
+    assert new_grammar == _graph
 
     grammar = Grammar()
     S = grammar.add_nonterminal("S", True)
@@ -49,7 +49,7 @@ def test_unreachable_remove():
 
     C %= b
 
-    new_grammar = unreachable_remove(grammar)
+    new_grammar = remove_unreachable_prods(grammar)
 
     _, new_grammar = grammar_to_graph(new_grammar)
 
@@ -58,7 +58,7 @@ def test_unreachable_remove():
     _graph["A"] = [["B", "a"]]
     _graph["B"] = [["S", "b"]]
     _graph["C"] = [["b"]]
-    assert (new_grammar == _graph)
+    assert new_grammar == _graph
 
     grammar = Grammar()
     S = grammar.add_nonterminal("S", True)
@@ -76,7 +76,7 @@ def test_unreachable_remove():
     C %= b
     C %= a
 
-    new_grammar = unreachable_remove(grammar)
+    new_grammar = remove_unreachable_prods(grammar)
 
     _, new_grammar = grammar_to_graph(new_grammar)
 
@@ -85,7 +85,7 @@ def test_unreachable_remove():
     _graph["A"] = [["B", "a"]]
     _graph["B"] = [["S", "b"]]
 
-    assert (new_grammar == _graph)
+    assert new_grammar == _graph
 
     # _graph = {}
     # _graph["S"] = [["a"], ["b"], ["C", "b"]]
@@ -110,7 +110,7 @@ def test_unreachable_remove():
 
     C %= a
 
-    new_grammar = unreachable_remove(grammar)
+    new_grammar = remove_unreachable_prods(grammar)
 
     _, new_grammar = grammar_to_graph(new_grammar)
 
@@ -120,10 +120,10 @@ def test_unreachable_remove():
 
     print(_graph)
     print(new_grammar)
-    assert (new_grammar == _graph)
+    assert new_grammar == _graph
 
 
-def test_unitary_remove():
+def test_remove_unit_prods():
     grammar = Grammar()
     S = grammar.add_nonterminal("S", True)
     A, B, C = grammar.add_nonterminals("A B C")
@@ -140,7 +140,7 @@ def test_unitary_remove():
 
     C %= a
 
-    new_grammar = unitary_remove(grammar)
+    new_grammar = remove_unit_prods(grammar)
 
     _, new_grammar = grammar_to_graph(new_grammar)
 
@@ -148,7 +148,7 @@ def test_unitary_remove():
     _graph["S"] = [["a"], ["b"], ["C", "b"]]
     _graph["C"] = [["a"]]
 
-    assert (new_grammar == _graph)
+    assert new_grammar == _graph
 
     grammar = Grammar()
     S = grammar.add_nonterminal("S", True)
@@ -166,7 +166,7 @@ def test_unitary_remove():
     C %= a
     C %= b
 
-    new_grammar = unitary_remove(grammar)
+    new_grammar = remove_unit_prods(grammar)
 
     _, new_grammar = grammar_to_graph(new_grammar)
 

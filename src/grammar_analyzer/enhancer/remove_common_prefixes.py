@@ -29,8 +29,7 @@ class Trie:
                 node = node.children[s]
             except KeyError:
                 node.children[s] = TrieNode(node.depth + 1, node, s)
-                if (len(node.children) == 2
-                        and node.parent) or node.productions:
+                if (len(node.children) == 2 and node.parent) or node.productions:
                     self.prefix_nodes.add(node)
                 node = node.children[s]
 
@@ -52,22 +51,24 @@ def remove_common_prefixes(G: Grammar):
         prefix_nodes = [n for n in trie.prefix_nodes]
         prefix_nodes.sort(key=lambda x: x.depth, reverse=True)
 
-        for (n) in (
-                prefix_nodes
+        for (
+            n
+        ) in (
+            prefix_nodes
         ):  # get the longest common prefix among the productions be the prefix α
             productions = trie.get_node_productions(
-                n)  # get all the productions with that prefix
+                n
+            )  # get all the productions with that prefix
             n.children.clear()
 
-            #A -> α ω1 | α ω2 | ... | α ωΝ
-            #replace those productions with
-            #A -> αA'
-            #A' -> ω1 | ω2 | ... | ωΝ
+            # A -> α ω1 | α ω2 | ... | α ωΝ
+            # replace those productions with
+            # A -> αA'
+            # A' -> ω1 | ω2 | ... | ωΝ
 
             A_new = G.add_nonterminal(A.name + ("'" * count), False)
             count += 1
-            A %= Sentence(*islice(productions[0].right, 0, n.depth +
-                                  1)) + A_new
+            A %= Sentence(*islice(productions[0].right, 0, n.depth + 1)) + A_new
             n.productions = [A.productions[-1]]
 
             for p in productions:
