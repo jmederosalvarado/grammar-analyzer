@@ -13,18 +13,22 @@ def test_remove_unreachable_prods():
     A, B, C = grammar.add_nonterminals("A B C")
     a, b = grammar.add_terminals("a b")
 
+    S %= a
     A %= B + a + b
     A %= B + a + a
     A %= B
 
-    remove_common_prefixes(grammar)
-    S, grammar = grammar_to_graph(grammar)
+    new_grammar = remove_common_prefixes(grammar)
+
+    S, new_grammar = grammar_to_graph(new_grammar)
+
     _graph = {}
+    _graph["S"] = [["a"]]
     _graph["A"] = [["B", "A''"]]
     _graph["A'"] = [["b"], ["a"]]
     _graph["A''"] = [[], ["a", "A'"]]
 
-    print(grammar)
+    print(new_grammar)
     print(_graph)
 
-    assert grammar == _graph
+    assert new_grammar == _graph
