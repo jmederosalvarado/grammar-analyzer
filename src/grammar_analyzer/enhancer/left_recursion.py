@@ -9,7 +9,6 @@ from grammar_analyzer.enhancer.unnecesary_productions import (
 def remove_left_recursion(grammar):
     new_grammar = __remove_epsilon_productions(grammar)
     new_grammar = remove_unit_prods(new_grammar)
-    new_grammar = remove_unreachable_prods(new_grammar)
 
     nonterminals = [t.name for t in new_grammar.nonterminals]
 
@@ -20,7 +19,7 @@ def remove_left_recursion(grammar):
             for sentence in d[nonterminals[i]]:
                 if sentence[0] == nonterminals[j]:
                     d[nonterminals[i]].remove(sentence)
-                    remove_first = sentence[1 : len(sentence)]
+                    remove_first = sentence[1:len(sentence)]
 
                     for sentence in d[nonterminals[j]]:
                         new_sentence = []
@@ -98,7 +97,8 @@ def __remove_epsilon_productions(grammar):
 
             for i in range(0, len(sentence)):
                 if sentence[i] in nonterminals and nullable[sentence[i]]:
-                    new_sentence = sentence[0:i] + sentence[i + 1 : len(sentence)]
+                    new_sentence = sentence[0:i] + sentence[i +
+                                                            1:len(sentence)]
 
                     if not new_sentence in new_value:
                         new_value.append(new_sentence)
@@ -127,7 +127,8 @@ def __find_nullable_nonterminals(d, nullable, symbol, nonterminals):
             elif not symb in nonterminals:
                 local_nullable = False
             else:
-                nullable = __find_nullable_nonterminals(d, nullable, symb, nonterminals)
+                nullable = __find_nullable_nonterminals(
+                    d, nullable, symb, nonterminals)
                 local_nullable = local_nullable and nullable[symb]
 
         nullable[symbol] = nullable[symbol] or local_nullable

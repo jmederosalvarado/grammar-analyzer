@@ -26,5 +26,5 @@ def run_enhancement_analysis(grammar):
 
 
 def grammar_to_str(grammar):
-    return "\n".join((f"> {p}\n") for p in grammar.productions)
-
+    return "\n".join((f"> {left} -> {right if len(right) else 'eps'}\n")
+                     for left, right in grammar.productions)

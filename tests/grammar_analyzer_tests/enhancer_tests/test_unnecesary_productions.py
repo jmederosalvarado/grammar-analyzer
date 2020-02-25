@@ -175,3 +175,53 @@ def test_remove_unit_prods():
     # print(_graph)
     # print(new_grammar)
     # assert (new_grammar == _graph)
+
+    grammar = Grammar()
+    S = grammar.add_nonterminal("S", True)
+    A, B, C = grammar.add_nonterminals("A B C")
+    a, b = grammar.add_terminals("a b")
+
+    S %= A
+    S %= b
+
+    A %= B
+    A %= a
+
+    B %= a
+    B %= C + b
+
+    C %= a
+
+    new_grammar = remove_unnecesary_productions(grammar)
+
+    _, new_grammar = grammar_to_graph(new_grammar)
+
+    _graph = {}
+    _graph["S"] = [["a"], ["b"], ["C", "b"]]
+    _graph["C"] = [["a"]]
+
+    assert new_grammar == _graph
+
+    grammar = Grammar()
+    S = grammar.add_nonterminal("S", True)
+    X, Y = grammar.add_nonterminals("X Y")
+    a, b = grammar.add_terminals("a b")
+
+    S %= X + a
+    S %= Y
+
+    X %= b
+    Y %= a
+
+    new_grammar = remove_unnecesary_productions(grammar)
+
+    _, new_grammar = grammar_to_graph(new_grammar)
+
+    _graph = {}
+    _graph["S"] = [["X", "a"], ["b"]]
+    _graph["X"] = [["b"]]
+
+
+# s -> X a | Y
+# X -> b
+# Y -> a
