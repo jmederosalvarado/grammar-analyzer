@@ -22,17 +22,25 @@ def run_slr_analysis(grammar):
     st.write("__ACTION:__", table_to_dataframe(action))
     st.write("__GOTO:__", table_to_dataframe(goto))
 
-    if not is_slr:
+    automaton = build_automaton(grammar)
+    st.write("__LR0 Automaton:__")
+    st.graphviz_chart(str(automaton))
+
+    if is_slr:
+        tree_builder = get_derivation_tree_builder(grammar)
+        string = st.text_input("Please enter a string to parse").split()
+        if not string:
+            return
+        tree = tree_builder(string)
+        st.graphviz_chart(str(tree))
+
+    else:
         conflict = build_conflict_str(grammar)
         conflict = " ".join(str(t) for t in conflict)
         st.write(
             "A possible string that leads to a conflict when trying to parse it is:"
         )
         st.write(f"> __{conflict.strip()}__ ...")
-
-    # automaton = build_automaton(grammar)
-    # st.write("__LR0 Automaton:__")
-    # st.graphviz_chart(str(automaton))
 
 
 def encode_value(value):

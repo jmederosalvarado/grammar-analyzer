@@ -67,8 +67,9 @@ def get_derivation_tree_builder(grammar):
     parser = __build_slr_parser(grammar)
 
     def tree_builder(tokens):
-        parse = parser(tokens)
-        right_parse = reversed(parse)
+        parse = parser([grammar[t] for t in tokens] + [grammar.eof])
+        right_parse = tuple(reversed(parse))
+        print(right_parse)
         return build_derivation_tree(right_parse, is_right_parse=True)
 
     return tree_builder

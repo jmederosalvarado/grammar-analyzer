@@ -10,15 +10,6 @@ from grammar_analyzer.ll_analyzer import (
 # pylint: disable=no-value-for-parameter
 
 
-def diplay_derivation_trees(grammar):
-    tree_builder = get_derivation_tree_builder(grammar)
-    string = st.text_input("Please enter a string to parse").split()
-    if not string:
-        return
-    tree = tree_builder(string)
-    st.graphviz_chart(str(tree))
-
-
 def run_ll_analysis(grammar):
     st.write("## LL Analysis")
     st.write("")
@@ -30,7 +21,12 @@ def run_ll_analysis(grammar):
     st.write("__Parsing Table:__", table_to_dataframe(table))
 
     if is_ll:
-        diplay_derivation_trees(grammar)
+        tree_builder = get_derivation_tree_builder(grammar)
+        string = st.text_input("Please enter a string to parse").split()
+        if not string:
+            return
+        tree = tree_builder(string)
+        st.graphviz_chart(str(tree))
 
     else:
         conflict = build_conflict_str(grammar)

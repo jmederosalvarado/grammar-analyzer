@@ -210,7 +210,7 @@ class ShiftReduceParser:
             # Reduce case
             if action == self.REDUCE:
                 output.append(tag)
-                stack = stack[: -len(tag.right)]
+                stack = stack[: len(stack) - len(tag.right)]
                 stack.append(self.goto[stack[-1], tag.left])
 
             # OK case
