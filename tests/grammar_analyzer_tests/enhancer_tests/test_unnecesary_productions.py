@@ -1,7 +1,5 @@
 from grammar_analyzer.enhancer.unnecesary_productions import (
-    unreachable_remove,
-    unitary_remove,
-)
+    unreachable_remove, unitary_remove, remove_unnecesary_productions)
 from grammar_analyzer.enhancer.converter import graph_to_grammar, grammar_to_graph
 from pycmp.parsing import compute_firsts
 from pycmp.utils import ContainerSet
@@ -140,7 +138,7 @@ def test_unitary_remove():
 
     C %= a
 
-    new_grammar = unitary_remove(grammar)
+    new_grammar = remove_unnecesary_productions(grammar)
 
     _, new_grammar = grammar_to_graph(new_grammar)
 
@@ -166,7 +164,7 @@ def test_unitary_remove():
     C %= a
     C %= b
 
-    new_grammar = unitary_remove(grammar)
+    new_grammar = remove_unnecesary_productions(grammar)
 
     _, new_grammar = grammar_to_graph(new_grammar)
 

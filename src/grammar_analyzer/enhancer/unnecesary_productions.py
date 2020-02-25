@@ -2,6 +2,12 @@ from pycmp.grammar import Grammar, Sentence, Symbol, Production, NonTerminal
 from grammar_analyzer.enhancer.converter import grammar_to_graph, graph_to_grammar
 
 
+def remove_unnecesary_productions(G: Grammar):
+    new_G = unitary_remove(G)
+    new_G = unreachable_remove(new_G)
+    return new_G
+
+
 def unreachable_remove(G: Grammar):
     S, d = grammar_to_graph(G)
     nonterminals = [t.name for t in G.nonterminals]
@@ -45,8 +51,8 @@ def unitary_remove(G: Grammar):
                 except KeyError:
                     new_d[pair[0]] = [sentence]
 
-    result = graph_to_grammar(S, new_d)
-    return unreachable_remove(result)
+    new_G = graph_to_grammar(S, new_d)
+    return unreachable_remove(new_G)
 
 
 def __find_unitary_pairs(d, nonterminals):
