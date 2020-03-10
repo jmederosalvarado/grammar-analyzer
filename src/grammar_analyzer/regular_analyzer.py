@@ -1,6 +1,10 @@
 from pycmp.grammar import Grammar
 from pycmp.automata import NFA, DFA, nfa_to_dfa
+from pycmp.regex import regex_tokenizer, Regex
+from pycmp.regex import EpsilonNode, SymbolNode, ClosureNode, ConcatNode, UnionNode
+from pycmp.evaluation import evaluate_parse
 from pycmp.utils import pprint
+from utils import visitor
 
 
 def is_regular_grammar(grammar: Grammar):
@@ -42,11 +46,70 @@ def grammar_to_automaton(grammar):
     return NFA(states, {final}, transitions)
 
 
+__nosymbol = "@"
+
+
 def automaton_to_regex(automaton):
     automaton = nfa_to_dfa(automaton)
 
     states, transitions = __automaton_to_gnfa(automaton)
-    return __gnfa_to_regex(list(range(states)), transitions)
+    regex = __gnfa_to_regex(list(range(states)), transitions)
+    ast = __get_regex_ast(regex)
+    return __simplify_regex(ast)
+
+
+def __get_regex_ast(regex):
+    tokens = regex_tokenizer(regex, Regex.grammar)
+    parse = Regex.parser([t.ttype for t in tokens])
+    return evaluate_parse(parse, tokens)
+
+
+@visitor.on("regex")
+def __simplify_regex(regex):
+    pass
+
+
+@__simplify_regex.when(EpsilonNode)
+def __simplify_regex_eps(regex: EpsilonNode):
+    return regex.lex
+
+
+@__simplify_regex.when(SymbolNode)
+def __simplify_regex_symbol(regex: SymbolNode):
+    return regex.lex
+
+
+@__simplify_regex.when(UnionNode)
+def __simplify_regex_union(regex: UnionNode):
+    left = __simplify_regex(regex.left)
+    right = __simplify_regex(regex.right)
+
+    if left == __nosymbol:
+        return right
+    if right == __nosymbol:
+        return left
+    if left == right:
+        return left
+    return f"({left}|{right})"
+
+
+@__simplify_regex.when(ClosureNode)
+def __simplify_regex_closure(regex: ClosureNode):
+    operand = __simplify_regex(regex.node)
+    if operand == __nosymbol:
+        return __nosymbol
+    return f"({operand})*"
+
+
+@__simplify_regex.when(ConcatNode)
+def __simplify_regex_concat(regex: ConcatNode):
+    left = __simplify_regex(regex.left)
+    right = __simplify_regex(regex.right)
+    if left == __nosymbol:
+        return right
+    if right == __nosymbol:
+        return left
+    return f"{left} {right}"
 
 
 def __gnfa_to_regex(states, transitions):
@@ -69,8 +132,6 @@ def __gnfa_to_regex(states, transitions):
 
 
 def __automaton_to_gnfa(automaton):
-    nosymbol = "@"
-
     states = automaton.states + 2
     start, old_start = 0, 1
     final = states - 1
@@ -85,19 +146,19 @@ def __automaton_to_gnfa(automaton):
                 if dests is not None and dest in dests:
                     trans_syms.append(symbol)
 
-            trans_regex = nosymbol if not trans_syms else "|".join(trans_syms)
+            trans_regex = __nosymbol if not trans_syms else "|".join(trans_syms)
             transitions[old_start + origin, old_start + dest] = trans_regex
 
     ## Add transitions from start state ...
 
     for state in range(automaton.states):
-        transitions[start, old_start + state] = nosymbol
+        transitions[start, old_start + state] = __nosymbol
     transitions[start, old_start] = "ε"
-    transitions[start, final] = nosymbol
+    transitions[start, final] = __nosymbol
 
     ## Add transitions to final state ...
     for state in range(automaton.states):
-        symbol = "ε" if state in automaton.finals else nosymbol
+        symbol = "ε" if state in automaton.finals else __nosymbol
         transitions[old_start + state, final] = symbol
 
     return states, transitions
