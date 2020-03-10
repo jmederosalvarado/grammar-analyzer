@@ -241,7 +241,7 @@ def build_conflict_str(grammar):
     return __build_conflict_str(
         parser_info.action_table,
         parser_info.goto_table,
-        grammar.terminals,
+        grammar.terminals + [grammar.eof],
         parser_info.shift_act,
         parser_info.reduce_act,
     )
