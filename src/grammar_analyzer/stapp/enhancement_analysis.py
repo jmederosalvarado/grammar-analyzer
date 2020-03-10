@@ -20,11 +20,13 @@ def run_enhancement_analysis(grammar):
     st.write("__Grammar without unnecesary productions:__")
     st.write(grammar_to_str(no_unnecesary_productions))
 
-    # no_common_prefixes = remove_common_prefixes(grammar)
-    # st.write("__Grammar without common prefixes:__")
-    # st.write(grammar_to_str(no_common_prefixes))
+    no_common_prefixes = remove_common_prefixes(grammar)
+    st.write("__Grammar without common prefixes:__")
+    st.write(grammar_to_str(no_common_prefixes))
 
 
 def grammar_to_str(grammar):
-    return "\n".join((f"> {left} -> {right if len(right) else 'eps'}\n")
-                     for left, right in grammar.productions)
+    return "\n".join(
+        (f"> {left} -> {right if len(right) else 'eps'}\n")
+        for left, right in grammar.productions
+    )

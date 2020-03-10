@@ -30,9 +30,9 @@ def run_lr_analysis(grammar):
         )
         st.write(f"> __{conflict.strip()}__ ...")
 
-    # automaton = build_automaton(grammar)
-    # st.write("__LR0 Automaton:__")
-    # st.graphviz_chart(str(automaton))
+    automaton = build_automaton(grammar)
+    st.write("__LR0 Automaton:__")
+    st.graphviz_chart(str(automaton))
 
 
 def encode_value(value):
