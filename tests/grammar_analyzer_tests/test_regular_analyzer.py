@@ -1,7 +1,9 @@
-from grammar_analyzer.regular_analyzer import (is_regular_grammar,
-                                               grammar_to_automaton,
-                                               automaton_to_regex,
-                                               __automaton_to_gnfa)
+from grammar_analyzer.regular_analyzer import (
+    is_regular_grammar,
+    grammar_to_automaton,
+    automaton_to_regex,
+    __automaton_to_gnfa,
+)
 from pycmp.grammar import Grammar, Sentence, Production
 from pycmp.utils import ContainerSet
 from pycmp.parsing import build_ll_parser
@@ -27,6 +29,30 @@ def test_is_regular():
     assert is_regular_grammar(G)
 
 
+def test_is_regular_2():
+    G = Grammar()
+
+    A = G.add_nonterminal("A", True)
+    B, C, D = G.add_nonterminals("B C D")
+    b, c, d = G.add_terminals("b c d")
+
+    A %= b + B
+    A %= c + C
+    A %= d + D
+
+    B %= c + C
+    B %= G.epsilon
+
+    C %= c + c + c
+    C %= G.epsilon
+
+    D %= d
+    D %= b
+    D %= G.epsilon
+
+    assert not is_regular_grammar(G)
+
+
 def test_gramar_to_automaton():
     pass
     G = Grammar()
@@ -42,7 +68,7 @@ def test_gramar_to_automaton():
     B %= b + B
     B %= b
 
-    aut = grammar_to_automaton(G)
+    # aut = grammar_to_automaton(G)
     # aut.graph().write("/home/rodrigo/Projects/grammar_analizer/graph",
     #                   format="svg")
 

@@ -28,7 +28,7 @@ def build_options():
         "LL": run_ll_analysis,
         "SLR": run_slr_analysis,
         "LR": run_lr_analysis,
-        "LALR (NOT WORKING)": run_lalr_analysis,
+        "LALR": run_lalr_analysis,
         "Regular": run_regular_analysis,
         "Enhancement": run_enhancement_analysis,
     }
