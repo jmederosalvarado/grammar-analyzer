@@ -128,3 +128,56 @@ def test_remove_left_recursion():
     print(new_grammar)
 
     assert new_grammar == _graph
+
+
+def test_remove_left_recursion_2():
+    grammar = Grammar()
+    A = grammar.add_nonterminal("A", True)
+    B, C, D, E, F = grammar.add_nonterminals("B C D E F")
+    a, b, c, d = grammar.add_terminals("a b c d")
+
+    A %= b + B
+    A %= c + C
+    A %= d + D
+
+    B %= c + C
+    B %= grammar.epsilon
+
+    C %= c + c + c
+    C %= A
+    C %= a
+    C %= b
+    C %= grammar.epsilon
+
+    D %= d
+    D %= b
+    D %= E
+    D %= grammar.epsilon
+
+    E %= F
+    E %= C
+
+    F %= D
+
+    new_grammar = remove_left_recursion(grammar)
+    _, new_grammar = grammar_to_graph(new_grammar)
+
+    _graph = {}
+    _graph["S"] = [["b"], ["A", "b"]]
+    _graph["A"] = [["B", "a"]]
+    _graph["B"] = [["b", "b", "B'"]]
+    _graph["B'"] = [["a", "b", "b", "B'"], []]
+    _graph["C"] = [["b"]]
+
+    print(_graph)
+    print(new_grammar)
+
+    assert True
+
+
+# A -> b B | c C | d D
+# B -> c C | eps
+# C -> c c c | A | a | b | eps
+# D -> d | b  | E | eps
+# E -> F | C
+# F -> D

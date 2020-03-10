@@ -3,8 +3,12 @@ from pycmp.automata import NFA, DFA, nfa_to_dfa
 from pycmp.utils import pprint
 
 
-def is_regular_grammar(grammar):
-    for _, right in grammar.productions:
+def is_regular_grammar(grammar: Grammar):
+    for nt, right in grammar.productions:
+        if right.is_epsilon or len(right) == 0:
+            if nt == grammar.start_symbol:
+                continue
+            return False
         if not right[0].is_terminal:
             return False
         if len(right) >= 2 and not right[1].is_nonterminal:
@@ -15,7 +19,8 @@ def is_regular_grammar(grammar):
 
 
 def grammar_to_automaton(grammar):
-    nonterminals = (nt for nt in grammar.nonterminals if nt != grammar.start_symbol)
+    nonterminals = (nt for nt in grammar.nonterminals
+                    if nt != grammar.start_symbol)
     state_map = {nt: i + 1 for i, nt in enumerate(nonterminals)}
     state_map[grammar.start_symbol] = 0
 

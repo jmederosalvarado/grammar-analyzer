@@ -27,6 +27,30 @@ def test_is_regular():
     assert is_regular_grammar(G)
 
 
+def test_is_regular_2():
+    G = Grammar()
+
+    A = G.add_nonterminal("A", True)
+    B, C, D = G.add_nonterminals("B C D")
+    b, c, d = G.add_terminals("b c d")
+
+    A %= b + B
+    A %= c + C
+    A %= d + D
+
+    B %= c + C
+    B %= G.epsilon
+
+    C %= c + c + c
+    C %= G.epsilon
+
+    D %= d
+    D %= b
+    D %= G.epsilon
+
+    assert not is_regular_grammar(G)
+
+
 def test_gramar_to_automaton():
     pass
     G = Grammar()

@@ -222,6 +222,85 @@ def test_remove_unit_prods():
     _graph["X"] = [["b"]]
 
 
-# s -> X a | Y
-# X -> b
-# Y -> a
+def test_remove_unreacable_prods_2():
+    grammar = Grammar()
+    A = grammar.add_nonterminal("A", True)
+    B, C, D, E, F = grammar.add_nonterminals("B C D E F")
+    a, b, c, d = grammar.add_terminals("a b c d")
+
+    A %= b + B
+    A %= c + C
+    A %= d + D
+
+    B %= c + C
+    B %= grammar.epsilon
+
+    C %= c + c + c
+    C %= A
+    C %= a
+    C %= b
+    C %= grammar.epsilon
+
+    D %= d
+    D %= b
+    D %= E
+    D %= grammar.epsilon
+
+    E %= F
+    E %= C
+
+    F %= D
+
+    new_grammar = remove_unreachable_prods(grammar)
+
+    _, new_grammar = grammar_to_graph(new_grammar)
+
+    _graph = {}
+    _graph["S"] = [["a"]]
+    _graph["A"] = [["B", "A''"]]
+    _graph["A'"] = [["b"], ["a"]]
+    _graph["A''"] = [[], ["a", "A'"]]
+
+    assert True
+
+
+def test_remove_unitary_prods_2():
+    grammar = Grammar()
+    A = grammar.add_nonterminal("A", True)
+    B, C, D, E, F = grammar.add_nonterminals("B C D E F")
+    a, b, c, d = grammar.add_terminals("a b c d")
+
+    A %= b + B
+    A %= c + C
+    A %= d + D
+
+    B %= c + C
+    B %= grammar.epsilon
+
+    C %= c + c + c
+    C %= A
+    C %= a
+    C %= b
+    C %= grammar.epsilon
+
+    D %= d
+    D %= b
+    D %= E
+    D %= grammar.epsilon
+
+    E %= F
+    E %= C
+
+    F %= D
+
+    new_grammar = remove_unit_prods(grammar)
+
+    _, new_grammar = grammar_to_graph(new_grammar)
+
+    _graph = {}
+    _graph["S"] = [["a"]]
+    _graph["A"] = [["B", "A''"]]
+    _graph["A'"] = [["b"], ["a"]]
+    _graph["A''"] = [[], ["a", "A'"]]
+
+    assert True

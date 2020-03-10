@@ -17,7 +17,7 @@ def remove_left_recursion(grammar):
     for i in range(0, len(nonterminals)):
         for j in range(0, i):
             for sentence in d[nonterminals[i]]:
-                if sentence[0] == nonterminals[j]:
+                if len(sentence) > 0 and sentence[0] == nonterminals[j]:
                     d[nonterminals[i]].remove(sentence)
                     remove_first = sentence[1:len(sentence)]
 
