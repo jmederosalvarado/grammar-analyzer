@@ -34,7 +34,11 @@ def grammar_to_automaton(grammar):
 
     for left, right in grammar.productions:
         origin = state_map[left]
-        symbol = right[0].name
+
+        if right.is_epsilon or len(right) == 0:
+            symbol = "ε"
+        else:
+            symbol = right[0].name
 
         dest = state_map[right[1]] if len(right) == 2 else final
         try:
@@ -146,7 +150,8 @@ def __automaton_to_gnfa(automaton):
                 if dests is not None and dest in dests:
                     trans_syms.append(symbol)
 
-            trans_regex = __nosymbol if not trans_syms else "|".join(trans_syms)
+            trans_regex = __nosymbol if not trans_syms else "|".join(
+                trans_syms)
             transitions[old_start + origin, old_start + dest] = trans_regex
 
     ## Add transitions from start state ...
