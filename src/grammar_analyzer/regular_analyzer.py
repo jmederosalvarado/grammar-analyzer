@@ -6,6 +6,9 @@ from pycmp.evaluation import evaluate_parse
 from pycmp.utils import pprint
 from utils import visitor
 
+__nosymbol = "@"
+__epsilon = "ε"
+
 
 def is_regular_grammar(grammar: Grammar):
     for nt, right in grammar.productions:
@@ -35,7 +38,7 @@ def grammar_to_automaton(grammar):
         origin = state_map[left]
 
         if right.is_epsilon or len(right) == 0:
-            symbol = "ε"
+            symbol = __epsilon
         else:
             symbol = right[0].name
 
@@ -49,17 +52,13 @@ def grammar_to_automaton(grammar):
     return NFA(states, {final}, transitions)
 
 
-__nosymbol = "@"
-
-
 def automaton_to_regex(automaton):
     automaton = nfa_to_dfa(automaton)
 
     states, transitions = __automaton_to_gnfa(automaton)
     regex = __gnfa_to_regex(list(range(states)), transitions)
-    # ast = __get_regex_ast(regex)
-    return regex
-    # return __simplify_regex(ast)
+    ast = __get_regex_ast(regex)
+    return __simplify_regex(ast)
 
 
 def __get_regex_ast(regex):
@@ -89,11 +88,12 @@ def __simplify_regex_union(regex: UnionNode):
     right = __simplify_regex(regex.right)
 
     if left == __nosymbol:
+        # print(f"{left} | {right} -> {right}")
         return right
     if right == __nosymbol:
+        # print(f"{left} | {right} -> {left}")
         return left
-    if left == right:
-        return left
+    # print(f"{left} | {right} -> {left} | {right}")
     return f"({left}|{right})"
 
 
@@ -101,7 +101,9 @@ def __simplify_regex_union(regex: UnionNode):
 def __simplify_regex_closure(regex: ClosureNode):
     operand = __simplify_regex(regex.node)
     if operand == __nosymbol:
-        return __nosymbol
+        # print(f"{operand}* -> {__epsilon}")
+        return __epsilon
+    # print(f"{operand}* -> ({operand})*")
     return f"({operand})*"
 
 
@@ -109,10 +111,10 @@ def __simplify_regex_closure(regex: ClosureNode):
 def __simplify_regex_concat(regex: ConcatNode):
     left = __simplify_regex(regex.left)
     right = __simplify_regex(regex.right)
-    if left == __nosymbol:
-        return right
-    if right == __nosymbol:
-        return left
+    if left == __nosymbol or right == __nosymbol:
+        # print(f"{left} {right} -> {__nosymbol}")
+        return __nosymbol
+    # print(f"{left} {right} -> ({left})({right})")
     return f"({left})({right})"
 
 
@@ -157,12 +159,12 @@ def __automaton_to_gnfa(automaton):
 
     for state in range(automaton.states):
         transitions[start, old_start + state] = __nosymbol
-    transitions[start, old_start] = "ε"
+    transitions[start, old_start] = __epsilon
     transitions[start, final] = __nosymbol
 
     ## Add transitions to final state ...
     for state in range(automaton.states):
-        symbol = "ε" if state in automaton.finals else __nosymbol
+        symbol = __epsilon if state in automaton.finals else __nosymbol
         transitions[old_start + state, final] = symbol
 
     return states, transitions
