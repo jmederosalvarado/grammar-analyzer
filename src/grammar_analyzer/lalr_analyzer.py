@@ -14,7 +14,7 @@ from grammar_analyzer.common import build_derivation_tree
 # region Carmen's code
 
 
-def mergue_items_lookaheads(items, others):
+def merge_items_lookaheads(items, others):
     if len(items) != len(others):
         return False
 
@@ -46,7 +46,7 @@ def build_lalr_automaton(G):
 
             # check for states with same center
             for state2 in states[i:]:
-                if mergue_items_lookaheads(items, state2.state):
+                if merge_items_lookaheads(items, state2.state):
                     visited[state2] = len(new_states)
 
             # add new state
