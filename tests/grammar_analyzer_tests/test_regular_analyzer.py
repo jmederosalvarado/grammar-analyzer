@@ -1,7 +1,9 @@
-from grammar_analyzer.regular_analyzer import (is_regular_grammar,
-                                               grammar_to_automaton,
-                                               automaton_to_regex,
-                                               __automaton_to_gnfa)
+from grammar_analyzer.regular_analyzer import (
+    is_regular_grammar,
+    grammar_to_automaton,
+    automaton_to_regex,
+    __automaton_to_gnfa,
+)
 from pycmp.grammar import Grammar, Sentence, Production
 from pycmp.utils import ContainerSet
 from pycmp.parsing import build_ll_parser
@@ -66,7 +68,7 @@ def test_gramar_to_automaton():
     B %= b + B
     B %= b
 
-    aut = grammar_to_automaton(G)
+    # aut = grammar_to_automaton(G)
     # aut.graph().write("/home/rodrigo/Projects/grammar_analizer/graph",
     #                   format="svg")
 

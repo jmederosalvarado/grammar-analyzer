@@ -23,8 +23,7 @@ def is_regular_grammar(grammar: Grammar):
 
 
 def grammar_to_automaton(grammar):
-    nonterminals = (nt for nt in grammar.nonterminals
-                    if nt != grammar.start_symbol)
+    nonterminals = (nt for nt in grammar.nonterminals if nt != grammar.start_symbol)
     state_map = {nt: i + 1 for i, nt in enumerate(nonterminals)}
     state_map[grammar.start_symbol] = 0
 
@@ -58,8 +57,9 @@ def automaton_to_regex(automaton):
 
     states, transitions = __automaton_to_gnfa(automaton)
     regex = __gnfa_to_regex(list(range(states)), transitions)
-    ast = __get_regex_ast(regex)
-    return __simplify_regex(ast)
+    # ast = __get_regex_ast(regex)
+    return regex
+    # return __simplify_regex(ast)
 
 
 def __get_regex_ast(regex):
@@ -113,7 +113,7 @@ def __simplify_regex_concat(regex: ConcatNode):
         return right
     if right == __nosymbol:
         return left
-    return f"{left} {right}"
+    return f"({left})({right})"
 
 
 def __gnfa_to_regex(states, transitions):
@@ -150,8 +150,7 @@ def __automaton_to_gnfa(automaton):
                 if dests is not None and dest in dests:
                     trans_syms.append(symbol)
 
-            trans_regex = __nosymbol if not trans_syms else "|".join(
-                trans_syms)
+            trans_regex = __nosymbol if not trans_syms else "|".join(trans_syms)
             transitions[old_start + origin, old_start + dest] = trans_regex
 
     ## Add transitions from start state ...
